@@ -1,11 +1,18 @@
 "use client";
 
-import { Users, Calendar, FileText, Briefcase } from "lucide-react";
+import {
+  Users,
+  Calendar,
+  FileText,
+  Briefcase,
+  ClipboardCheck,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useHR } from "@/hooks/useHR";
 import { EmployeesComponent } from "@/components/hr/Employees";
 import { AttendancesComponent } from "@/components/hr/Attendances";
+import { ChecklistAttendanceComponent } from "@/components/hr/ChecklistAttendance";
 import { ContractsComponent } from "@/components/hr/Contracts";
 import { LeavesComponent } from "@/components/hr/Leaves";
 
@@ -26,6 +33,9 @@ export default function HRPage() {
     createContract,
     updateContract,
     deleteContract,
+    finalizeContract,
+    sendContractToEmployee,
+    uploadSignedContract,
     createLeave,
     updateLeave,
     deleteLeave,
@@ -140,6 +150,10 @@ export default function HRPage() {
               <Calendar className="h-4 w-4 mr-2" />
               Attendance
             </TabsTrigger>
+            <TabsTrigger value="checklist-attendance">
+              <ClipboardCheck className="h-4 w-4 mr-2" />
+              Checklist Attendance
+            </TabsTrigger>
             <TabsTrigger value="contracts">
               <Briefcase className="h-4 w-4 mr-2" />
               Contracts
@@ -169,6 +183,16 @@ export default function HRPage() {
             />
           </TabsContent>
 
+          <TabsContent value="checklist-attendance">
+            <ChecklistAttendanceComponent
+              employees={employees}
+              attendances={attendances}
+              createAttendance={createAttendance}
+              updateAttendance={updateAttendance}
+              deleteAttendance={deleteAttendance}
+            />
+          </TabsContent>
+
           <TabsContent value="contracts">
             <ContractsComponent
               contracts={contracts}
@@ -176,6 +200,9 @@ export default function HRPage() {
               createContract={createContract}
               updateContract={updateContract}
               deleteContract={deleteContract}
+              finalizeContract={finalizeContract}
+              sendContractToEmployee={sendContractToEmployee}
+              uploadSignedContract={uploadSignedContract}
             />
           </TabsContent>
 

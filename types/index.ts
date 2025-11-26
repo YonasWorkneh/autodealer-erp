@@ -248,22 +248,32 @@ export interface Contract {
   id: number;
   employee_email_display: string;
   employee_full_name: string;
+  employee_type: "permanent" | "contract" | "temporary" | "intern";
+  job_title: string;
+  contract_salary: string;
+  transport_allowance: string;
   start_date: string;
+  probation_end_date: string;
   end_date: string;
   terms: string;
-  salary: string;
-  status: "active" | "inactive" | "terminated";
+  status: "draft" | "sent_to_employee" | "active" | "inactive" | "terminated";
+  draft_document_url: string | null;
+  employee_signed_document_url: string | null;
+  final_document_url: string | null;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
 }
 
 export interface CreateContractRequest {
   employee_email: string;
+  employee_type: "permanent" | "contract" | "temporary" | "intern";
+  job_title: string;
+  contract_salary: string;
+  transport_allowance: string;
   start_date: string;
+  probation_end_date: string;
   end_date: string;
   terms: string;
-  salary: string;
-  status: "active" | "inactive" | "terminated";
 }
 
 export interface Leave {

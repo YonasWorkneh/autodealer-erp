@@ -37,6 +37,9 @@ interface HRState {
   createContract: (contract: CreateContractRequest) => Promise<void>;
   updateContract: (id: number, contract: Partial<CreateContractRequest>) => Promise<void>;
   deleteContract: (id: number) => Promise<void>;
+  finalizeContract: (id: number, finalDocument: File) => Promise<void>;
+  sendContractToEmployee: (id: number) => Promise<void>;
+  uploadSignedContract: (id: number, signedDocument: File) => Promise<void>;
 
   // Leave actions
   getLeaves: () => Promise<void>;
@@ -256,6 +259,66 @@ export const useHRStore = create<HRState>((set, get) => ({
       }));
     } catch (error) {
       console.error("Error deleting contract:", error);
+      set({ error: (error as Error).message, isLoading: false });
+      throw error;
+    }
+  },
+
+  finalizeContract: async (id, finalDocument) => {
+    set({ isLoading: true, error: null });
+    try {
+      const formData = new FormData();
+      formData.append("final_document", finalDocument);
+      await api(`/hr/contracts/${id}/finalize/`, {
+        method: "POST",
+        body: formData,
+      });
+      // Refresh contracts to get updated data
+      const res = await api<Contract[]>("/hr/contracts/", {
+        method: "GET",
+      });
+      set({ contracts: res, isLoading: false });
+    } catch (error) {
+      console.error("Error finalizing contract:", error);
+      set({ error: (error as Error).message, isLoading: false });
+      throw error;
+    }
+  },
+
+  sendContractToEmployee: async (id) => {
+    set({ isLoading: true, error: null });
+    try {
+      await api(`/hr/contracts/${id}/send_to_employee/`, {
+        method: "POST",
+      });
+      // Refresh contracts to get updated data
+      const res = await api<Contract[]>("/hr/contracts/", {
+        method: "GET",
+      });
+      set({ contracts: res, isLoading: false });
+    } catch (error) {
+      console.error("Error sending contract to employee:", error);
+      set({ error: (error as Error).message, isLoading: false });
+      throw error;
+    }
+  },
+
+  uploadSignedContract: async (id, signedDocument) => {
+    set({ isLoading: true, error: null });
+    try {
+      const formData = new FormData();
+      formData.append("signed_document", signedDocument);
+      await api(`/hr/contracts/${id}/upload_signed/`, {
+        method: "POST",
+        body: formData,
+      });
+      // Refresh contracts to get updated data
+      const res = await api<Contract[]>("/hr/contracts/", {
+        method: "GET",
+      });
+      set({ contracts: res, isLoading: false });
+    } catch (error) {
+      console.error("Error uploading signed contract:", error);
       set({ error: (error as Error).message, isLoading: false });
       throw error;
     }

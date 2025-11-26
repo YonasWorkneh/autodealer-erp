@@ -23,6 +23,9 @@ export const useHR = () => {
   const createContract = useHRStore((state) => state.createContract);
   const updateContract = useHRStore((state) => state.updateContract);
   const deleteContract = useHRStore((state) => state.deleteContract);
+  const finalizeContract = useHRStore((state) => state.finalizeContract);
+  const sendContractToEmployee = useHRStore((state) => state.sendContractToEmployee);
+  const uploadSignedContract = useHRStore((state) => state.uploadSignedContract);
 
   const getLeaves = useHRStore((state) => state.getLeaves);
   const createLeave = useHRStore((state) => state.createLeave);
@@ -62,6 +65,9 @@ export const useHR = () => {
     createContract,
     updateContract,
     deleteContract,
+    finalizeContract,
+    sendContractToEmployee,
+    uploadSignedContract,
 
     // Leave actions
     getLeaves,
