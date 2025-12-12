@@ -106,9 +106,9 @@ export default function page() {
 
           {/* Cars Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {cars.map((car) => (
+            {cars?.map((car) => (
               <Card
-                key={car.id}
+                key={car?.id}
                 className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer relative"
                 onClick={() => router.push(`/listing/${car.id}`)}
               >

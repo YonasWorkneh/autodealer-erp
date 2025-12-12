@@ -232,7 +232,9 @@ export function EmployeesComponent({
               {employees.length > 0 ? (
                 employees.map((employee) => (
                   <tr key={employee.id} className="border-b hover:bg-gray-50">
-                    <td className="p-2">{employee.full_name}</td>
+                    <td className="p-2">
+                      {employee.full_name || employee.user_email_display}
+                    </td>
                     <td className="p-2 text-sm text-muted-foreground">
                       {employee.user_email_display}
                     </td>

@@ -41,7 +41,15 @@ export default function HRPage() {
     deleteLeave,
   } = useHR();
 
-  if (isLoading) {
+  // Only show loading screen on initial load (when no data exists yet)
+  const isInitialLoad =
+    isLoading &&
+    employees.length === 0 &&
+    attendances.length === 0 &&
+    contracts.length === 0 &&
+    leaves.length === 0;
+
+  if (isInitialLoad) {
     return (
       <div className="flex items-center justify-center h-screen">
         <p className="text-muted-foreground">Loading HR data...</p>

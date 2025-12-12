@@ -13,6 +13,7 @@ import {
 import { Employee, Attendance, CreateAttendanceRequest } from "@/types";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 
 interface ChecklistAttendanceProps {
   employees: Employee[];
@@ -44,9 +45,10 @@ export function ChecklistAttendanceComponent({
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [attendanceData, setAttendanceData] = useState<AttendanceData>({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [pendingCell, setPendingCell] = useState<string | null>(null);
+  const { toast } = useToast();
 
-  // Get number of days in the selected month
+  // Get number of days in the selected mont
   const daysInMonth = useMemo(() => {
     return new Date(selectedYear, selectedMonth + 1, 0).getDate();
   }, [selectedMonth, selectedYear]);
@@ -116,6 +118,7 @@ export function ChecklistAttendanceComponent({
     checked: boolean
   ) => {
     const date = formatDate(day);
+    const cellKey = `${employeeEmail}-${date}`;
     const existingAttendance = attendanceData[employeeEmail]?.[date];
 
     // Optimistically update the UI
@@ -130,7 +133,7 @@ export function ChecklistAttendanceComponent({
       },
     }));
 
-    setIsLoading(true);
+    setPendingCell(cellKey);
     try {
       if (checked) {
         // Create new attendance record
@@ -145,11 +148,19 @@ export function ChecklistAttendanceComponent({
           status: "present",
           notes: "Checklist attendance",
         });
+        toast({
+          title: "Attendance saved",
+          description: `${employeeEmail} marked present for ${date}`,
+        });
       } else {
         // Delete the attendance record if it exists
         if (existingAttendance && existingAttendance.id) {
           await deleteAttendance(existingAttendance.id);
         }
+        toast({
+          title: "Attendance removed",
+          description: `${employeeEmail} marked absent for ${date}`,
+        });
       }
     } catch (error) {
       console.error("Error updating attendance:", error);
@@ -164,9 +175,13 @@ export function ChecklistAttendanceComponent({
           },
         },
       }));
-      alert("Failed to update attendance. Please try again.");
+      toast({
+        title: "Update failed",
+        description: "Could not update attendance. Please try again.",
+        variant: "destructive",
+      });
     } finally {
-      setIsLoading(false);
+      setPendingCell(null);
     }
   };
 
@@ -309,7 +324,9 @@ export function ChecklistAttendanceComponent({
                               <div className="flex justify-center">
                                 <Checkbox
                                   checked={isChecked}
-                                  disabled={isLoading}
+                                  disabled={
+                                    pendingCell === `${employeeEmail}-${date}`
+                                  }
                                   onCheckedChange={(checked) =>
                                     handleCheckboxChange(
                                       employeeEmail,
