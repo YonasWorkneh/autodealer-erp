@@ -448,7 +448,7 @@ export default function SalesPage() {
                             {cars.map((car) => (
                               <SelectItem
                                 key={car.id}
-                                value={car.id.toString()}
+                                value={car?.id?.toString()}
                               >
                                 {car.year} {car.make} {car.model} - $
                                 {parseFloat(

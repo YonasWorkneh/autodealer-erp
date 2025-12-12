@@ -27,6 +27,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { useRouter } from "next/navigation";
 import { useCarData } from "@/hooks/useCarData";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const sidebarItems = [
   { icon: Grid3X3, label: "Dashboard", active: true },
@@ -49,6 +50,7 @@ export default function page() {
   const [searchQuery, setSearchQuery] = useState("");
   const { cars, isLoading, error, fetchCars } = useCarData();
   const router = useRouter();
+  const userRole = useUserRole();
 
   useEffect(() => {
     fetchCars();
@@ -68,15 +70,18 @@ export default function page() {
               <p className="text-muted-foreground">
                 Manage your car posts &mdash; Add, edit and delete cars.
               </p>
-              <Link
-                href={"/listing/new"}
-                className="group bg-zinc-800 hover:bg-zinc-900 text-white py-2 text-sm w-fit cursor-pointer flex gap-2 items-center px-3 rounded-full"
-              >
-                <span>Add New</span>
-                <span className="group-hover:translate-x-1 transition-all">
-                  →
-                </span>
-              </Link>
+
+              {userRole !== "dealer" && (
+                <Link
+                  href={"/listing/new"}
+                  className="group bg-zinc-800 hover:bg-zinc-900 text-white py-2 text-sm w-fit cursor-pointer flex gap-2 items-center px-3 rounded-full"
+                >
+                  <span>Add New</span>
+                  <span className="group-hover:translate-x-1 transition-all">
+                    →
+                  </span>
+                </Link>
+              )}
             </div>
           </div>
         </div>

@@ -52,9 +52,19 @@ import { useAnalytics } from "@/hooks/useAnalytics";
 import { useCarData } from "@/hooks/useCarData";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useUserRole } from "@/hooks/useUserRole";
+import { getDefaultRoute } from "@/lib/getDefaultRoute";
 
 export default function page() {
   const router = useRouter();
+  const userRole = useUserRole();
+
+  useEffect(() => {
+    if (userRole !== "dealer") {
+      const defaultRoute = getDefaultRoute(userRole);
+      router.push(defaultRoute);
+    }
+  }, [userRole, router]);
 
   const salesData = [
     { month: "Jan", sales: 45, revenue: 1250000 },

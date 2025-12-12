@@ -1,5 +1,6 @@
 import { useCarStore } from "@/store/car";
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
+import { useUserRole } from "@/hooks/useUserRole";
 
 export function useCarData() {
   const makes = useCarStore((state) => state.makes);
@@ -14,12 +15,25 @@ export function useCarData() {
   const postCar = useCarStore((state) => state.postCar);
   const fetchCars = useCarStore((state) => state.fetchCars);
   const fetchFilteredCars = useCarStore((state) => state.fetchFilteredCars);
+  const userRole = useUserRole();
 
   useEffect(() => {
     if (makes.length === 0) {
       fetchMakes();
     }
   }, []);
+
+  // Wrapper functions that include role
+  const fetchCarsWithRole = useCallback(() => {
+    return fetchCars(userRole);
+  }, [fetchCars, userRole]);
+
+  const fetchCarByIdWithRole = useCallback(
+    (id: string) => {
+      return fetchCarById(id, userRole);
+    },
+    [fetchCarById, userRole]
+  );
 
   return {
     cars,
@@ -31,8 +45,8 @@ export function useCarData() {
     fetchMakes,
     fetchModels,
     postCar,
-    fetchCarById,
-    fetchCars,
+    fetchCarById: fetchCarByIdWithRole,
+    fetchCars: fetchCarsWithRole,
     fetchFilteredCars,
   };
 }

@@ -1,16 +1,10 @@
 "use client";
 
 import {
-  BarChart3,
-  Bluetooth,
-  Calendar,
   CarFront,
-  ChartNoAxesCombined,
   LayoutDashboard,
   LogOut,
-  PackageCheck,
   Settings,
-  Users,
   Calculator,
   TrendingUp,
   UserCheck,
@@ -18,25 +12,47 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { clearAuthState } from "@/lib/api";
 import { useUserStore } from "@/store/user";
+import { useUserRole } from "@/hooks/useUserRole";
+import { useProfile } from "@/hooks/useProfile";
 
 export default function Sidebar() {
-  const links = [
-    { label: "Dashboard", href: "/", icon: LayoutDashboard },
-    { label: "Cars", href: "/listing", icon: CarFront },
-    { label: "Sales", href: "/sales", icon: TrendingUp },
-    { label: "Accounting", href: "/accounting", icon: Calculator },
-    { label: "HR", href: "/hr", icon: Briefcase },
-    { label: "Staff", href: "/staff", icon: UserCheck },
+  const allLinks = [
+    { label: "Dashboard", href: "/", icon: LayoutDashboard, roles: ["dealer"] },
+    {
+      label: "Cars",
+      href: "/listing",
+      icon: CarFront,
+      roles: ["dealer", "seller"],
+    },
+    { label: "Sales", href: "/sales", icon: TrendingUp, roles: ["seller"] },
+    {
+      label: "Accounting",
+      href: "/accounting",
+      icon: Calculator,
+      roles: ["accountant"],
+    },
+    { label: "HR", href: "/hr", icon: Briefcase, roles: ["hr"] },
+    { label: "Staff", href: "/staff", icon: UserCheck, roles: ["dealer"] },
     // { label: "Users", href: "/users", icon: Users },
   ];
+
   const pathName = usePathname();
   const router = useRouter();
   const { clearUser } = useUserStore();
+  const userRole = useUserRole();
+  const { dealer } = useProfile();
   const isAuthPage = pathName.includes("signin") || pathName.includes("signup");
+
+  console.log("userRole", userRole);
+  console.log("dealer", dealer?.role);
+
+  const links = useMemo(() => {
+    return allLinks.filter((link) => link.roles.includes(userRole));
+  }, [userRole]);
 
   const handleLogout = async () => {
     try {
@@ -53,6 +69,7 @@ export default function Sidebar() {
   };
 
   if (isAuthPage) return null;
+
   return (
     <aside
       className={`w-20 bg-gray-200 flex flex-col items-center py-6 space-y-6 fixed left-0 top-0 h-full z-10 ${

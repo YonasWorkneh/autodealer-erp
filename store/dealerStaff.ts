@@ -39,7 +39,7 @@ export const useDealerStaffStore = create<DealerStaffState>((set, get) => ({
     try {
       const res = await api<DealerStaff>("/dealers/staff/", {
         method: "POST",
-        body: JSON.stringify(staffData),
+        body: staffData,
       });
       set((state) => ({
         staff: [res, ...state.staff],
@@ -56,7 +56,7 @@ export const useDealerStaffStore = create<DealerStaffState>((set, get) => ({
     try {
       const res = await api<DealerStaff>(`/dealers/staff/${id}/`, {
         method: "PUT",
-        body: JSON.stringify(staffData),
+        body: staffData,
       });
       set((state) => ({
         staff: state.staff.map((s) => (s.id === id ? res : s)),

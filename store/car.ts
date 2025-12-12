@@ -1,6 +1,7 @@
 import { api } from "@/lib/api";
 import { create } from "zustand";
 import { Car } from "@/types";
+import { UserRole } from "@/hooks/useUserRole";
 
 export interface Make {
   id: number;
@@ -20,8 +21,8 @@ interface CarState {
   models: Model[];
   isLoading: boolean;
   error: string | null;
-  fetchCars: () => Promise<void>;
-  fetchCarById: (id: string) => Promise<void>;
+  fetchCars: (role?: UserRole) => Promise<void>;
+  fetchCarById: (id: string, role?: UserRole) => Promise<void>;
   fetchMakes: () => Promise<void>;
   fetchModels: (makeId?: number) => Promise<void>;
   postCar: (car: FormData) => Promise<void>;
@@ -45,24 +46,62 @@ export const useCarStore = create<CarState>((set) => ({
   isLoading: false,
   error: null,
 
-  fetchCars: async () => {
+  fetchCars: async (role?: UserRole) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await api<Car[]>("/inventory/user-cars/", {
-        method: "GET",
-      });
+      let res: Car[];
+
+      // Use different endpoints based on role
+      if (role === "seller") {
+        // Sellers can see all cars, try the general cars endpoint first
+        try {
+          res = await api<Car[]>("/inventory/cars/", {
+            method: "GET",
+          });
+        } catch (error) {
+          // If that fails, try the filter endpoint with no filters
+          res = await api<Car[]>("/inventory/cars/filter/", {
+            method: "GET",
+          });
+        }
+      } else {
+        // Dealers and other roles use user-cars endpoint
+        res = await api<Car[]>("/inventory/user-cars/", {
+          method: "GET",
+        });
+      }
+
       set({ cars: res, isLoading: false });
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false });
     }
   },
 
-  fetchCarById: async (id: string) => {
+  fetchCarById: async (id: string, role?: UserRole) => {
     set({ car: null, isLoading: true, error: null });
     try {
-      const res = await api<Car>(`/inventory/user-cars/${id}`, {
-        method: "GET",
-      });
+      let res: Car;
+
+      // Use different endpoints based on role
+      if (role === "seller") {
+        // Sellers use the general cars endpoint
+        try {
+          res = await api<Car>(`/inventory/cars/${id}/`, {
+            method: "GET",
+          });
+        } catch (error) {
+          // Fallback to user-cars if general endpoint doesn't work
+          res = await api<Car>(`/inventory/user-cars/${id}`, {
+            method: "GET",
+          });
+        }
+      } else {
+        // Dealers and other roles use user-cars endpoint
+        res = await api<Car>(`/inventory/user-cars/${id}`, {
+          method: "GET",
+        });
+      }
+
       set({ car: res, isLoading: false });
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false });

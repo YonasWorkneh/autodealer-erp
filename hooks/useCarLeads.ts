@@ -25,11 +25,9 @@ export const useCarLeads = (carId: string | number | undefined) => {
         method: "GET",
       });
 
-      // Filter leads for the specific car and transform the data
       const carLeads: CarLead[] = response
         .filter((lead) => lead.car === Number(carId))
         .map((lead) => {
-          // Generate initials from name
           const nameParts = lead.name.trim().split(" ");
           const initials =
             nameParts.length >= 2
@@ -38,7 +36,6 @@ export const useCarLeads = (carId: string | number | undefined) => {
                 }`.toUpperCase()
               : nameParts[0].substring(0, 2).toUpperCase();
 
-          // Check if contact is an email or phone
           const isEmail = lead.contact.includes("@");
 
           return {

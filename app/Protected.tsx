@@ -13,18 +13,17 @@ export default function Protected({
   children: ReactElement;
   isLogged: boolean;
 }) {
-  const [isMounted, setIsMounted] = useState(false);
-  const { setUser } = useUserStore();
   const router = useRouter();
   const pathname = usePathname();
+  const isAuthPath =
+    pathname?.startsWith("/signin") ||
+    pathname?.startsWith("/signup") ||
+    pathname?.startsWith("/forgot-password") ||
+    pathname?.startsWith("/reset");
+  const [isMounted, setIsMounted] = useState(() => isAuthPath);
+  const { setUser } = useUserStore();
 
   useEffect(() => {
-    const isAuthPath =
-      pathname?.startsWith("/signin") ||
-      pathname?.startsWith("/signup") ||
-      pathname?.startsWith("/forgot-password") ||
-      pathname?.startsWith("/reset");
-
     // For auth pages, just mount immediately without any auth logic
     if (isAuthPath) {
       setIsMounted(true);
@@ -71,7 +70,7 @@ export default function Protected({
     };
 
     refreshUserCredentials();
-  }, [isLogged, router, setUser, pathname]);
+  }, [isAuthPath, isLogged, router, setUser, pathname]);
   if (!isMounted) return <Loading />;
   return <div>{children}</div>;
 }

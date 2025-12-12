@@ -21,7 +21,9 @@ import { useForm } from "react-hook-form";
 import { signin } from "@/lib/auth/signin";
 import { useUserStore } from "@/store/user";
 import { useRouter } from "next/navigation";
-import { initializeAuthState } from "@/lib/api";
+import { initializeAuthState, api } from "@/lib/api";
+import { getDefaultRoute } from "@/lib/getDefaultRoute";
+import { UserRole } from "@/hooks/useUserRole";
 
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -40,8 +42,52 @@ export default function SignIn() {
       if (!user.access) throw new Error("Error trying to log you in");
       setUser(user.user);
       initializeAuthState(user.user);
-      router.push("/");
-      data;
+
+      let userRole: UserRole = "dealer";
+
+      try {
+        if (user.user.is_staff) {
+          userRole = "hr";
+        } else {
+          try {
+            const dealer = await api<any>("/dealers/me/", { method: "GET" });
+            if (dealer?.role) {
+              const dealerRole = dealer.role.toLowerCase();
+              if (
+                dealerRole === "hr" ||
+                dealerRole === "dealer" ||
+                dealerRole === "accountant" ||
+                dealerRole === "seller"
+              ) {
+                userRole = dealerRole as UserRole;
+              }
+            } else if (dealer) {
+              userRole = "dealer";
+            }
+          } catch (dealerError) {
+            try {
+              const staff = await api<any[]>("/dealers/staff/", {
+                method: "GET",
+              });
+              const currentUserStaff = staff.find(
+                (s) => s.user.email === user.user.email
+              );
+              if (currentUserStaff) {
+                if (currentUserStaff.role === "accountant") {
+                  userRole = "accountant";
+                } else if (currentUserStaff.role === "seller") {
+                  userRole = "seller";
+                }
+              }
+            } catch (staffError) {}
+          }
+        }
+      } catch (roleError) {
+        console.log("Error determining role, using default:", roleError);
+      }
+
+      const defaultRoute = getDefaultRoute(userRole);
+      router.push(defaultRoute);
     } catch (err: any) {
       setErr(err.message);
     } finally {
@@ -93,12 +139,6 @@ export default function SignIn() {
           <div className="grid gap-2">
             <div className="flex items-center">
               <Label htmlFor="password">Password</Label>
-              <Link
-                href="/forgot-password"
-                className="ml-auto inline-block text-sm underline"
-              >
-                Forgot your password?
-              </Link>
             </div>
             <div className="relative">
               <Input

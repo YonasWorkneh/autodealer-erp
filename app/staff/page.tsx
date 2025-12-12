@@ -25,7 +25,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDealerStaff } from "@/hooks/useDealerStaff";
 import { CreateDealerStaffRequest } from "@/types";
+import { signup } from "@/lib/auth/signup";
 import { toast } from "sonner";
+import { useUserRole } from "@/hooks/useUserRole";
 
 export default function StaffPage() {
   const { staff, isLoading, error, createStaff, updateStaff, deleteStaff } =
@@ -33,16 +35,52 @@ export default function StaffPage() {
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingStaff, setEditingStaff] = useState<number | null>(null);
-  const [formData, setFormData] = useState<CreateDealerStaffRequest>({
+  const [formData, setFormData] = useState<
+    CreateDealerStaffRequest & {
+      first_name: string;
+      last_name: string;
+      description: string;
+      password1: string;
+      password2: string;
+    }
+  >({
     user_email: "",
     role: "seller",
+    first_name: "",
+    last_name: "",
+    description: "",
+    password1: "",
+    password2: "",
   });
+  const userRole = useUserRole();
 
   const handleCreateStaff = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await createStaff(formData);
-      setFormData({ user_email: "", role: "seller" });
+      await signup({
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        email: formData.user_email,
+        password1: formData.password1,
+        password2: formData.password2,
+        description: formData.description,
+      });
+
+      await createStaff({
+        user_email: formData.user_email,
+        role: formData.role,
+      });
+
+      setFormData((prev) => ({
+        ...prev,
+        user_email: "",
+        role: "seller",
+        first_name: "",
+        last_name: "",
+        description: "",
+        password1: "",
+        password2: "",
+      }));
       setShowCreateDialog(false);
       toast.success("Staff member added successfully");
     } catch (error) {
@@ -58,7 +96,11 @@ export default function StaffPage() {
     try {
       await updateStaff(editingStaff, formData);
       setEditingStaff(null);
-      setFormData({ user_email: "", role: "seller" });
+      setFormData((prev) => ({
+        ...prev,
+        user_email: "",
+        role: "seller",
+      }));
       toast.success("Staff member updated successfully");
     } catch (error) {
       toast.error("Failed to update staff member");
@@ -82,10 +124,11 @@ export default function StaffPage() {
 
   const openEditDialog = (staffMember: any) => {
     setEditingStaff(staffMember.id);
-    setFormData({
+    setFormData((prev) => ({
+      ...prev,
       user_email: staffMember.user.email,
       role: staffMember.role,
-    });
+    }));
   };
 
   const getRoleColor = (role: string) => {
@@ -158,10 +201,12 @@ export default function StaffPage() {
         </div>
         <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
           <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Staff Member
-            </Button>
+            {userRole === "dealer" && (
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Staff Member
+              </Button>
+            )}
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
@@ -172,6 +217,32 @@ export default function StaffPage() {
             </DialogHeader>
             <form onSubmit={handleCreateStaff}>
               <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="first_name">First Name</Label>
+                    <Input
+                      id="first_name"
+                      value={formData.first_name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, first_name: e.target.value })
+                      }
+                      placeholder="First name"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="last_name">Last Name</Label>
+                    <Input
+                      id="last_name"
+                      value={formData.last_name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, last_name: e.target.value })
+                      }
+                      placeholder="Last name"
+                      required
+                    />
+                  </div>
+                </div>
                 <div>
                   <Label htmlFor="user_email">Email Address</Label>
                   <Input
@@ -184,6 +255,43 @@ export default function StaffPage() {
                     placeholder="user@example.com"
                     required
                   />
+                </div>
+                <div>
+                  <Label htmlFor="description">Description</Label>
+                  <Input
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                    placeholder="Sales staff, Accountant, etc."
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="password1">Password</Label>
+                    <Input
+                      id="password1"
+                      type="password"
+                      value={formData.password1}
+                      onChange={(e) =>
+                        setFormData({ ...formData, password1: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="password2">Confirm Password</Label>
+                    <Input
+                      id="password2"
+                      type="password"
+                      value={formData.password2}
+                      onChange={(e) =>
+                        setFormData({ ...formData, password2: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
                 </div>
                 <div>
                   <Label htmlFor="role">Role</Label>

@@ -5,6 +5,7 @@ interface SignUpParams {
   email: string;
   password1: string;
   password2: string;
+  description?: string;
 }
 
 export const signup = async (data: SignUpParams) => {
