@@ -1,46 +1,195 @@
-// "use client";
+"use client";
 
-// import { Card, CardContent } from "@/components/ui/card";
-// import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAnalytics } from "@/hooks/useAnalytics";
+import { BarChart3, TrendingUp, Car, DollarSign, Eye } from "lucide-react";
 
-// export default function DealerSalesProgress({
-//   sales,
-// }: {
-//   sales: { car: string; sold: number; target: number; revenue: number }[];
-// }) {
-//   const totalSold = sales?.reduce((acc, s) => acc + s.sold, 0);
-//   const totalRevenue = sales?.reduce((acc, s) => acc + s.revenue, 0);
+export default function AnalyticsPage() {
+  const {
+    analytics,
+    topSellers,
+    highSaleCars,
+    isLoading,
+    error,
+  } = useAnalytics();
 
-//   return (
-//     <Card className="p-6">
-//       <h3 className="text-xl font-semibold mb-4">Sales Progress</h3>
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-muted-foreground">Loading analytics...</p>
+      </div>
+    );
+  }
 
-//       {/* Summary */}
-//       <div className="flex justify-between mb-6">
-//         <div>
-//           <p className="text-sm text-muted-foreground">Total Cars Sold</p>
-//           <p className="text-2xl font-bold">{totalSold}</p>
-//         </div>
-//         <div>
-//           <p className="text-sm text-muted-foreground">Total Revenue</p>
-//           <p className="text-2xl font-bold">${totalRevenue.toLocaleString()}</p>
-//         </div>
-//       </div>
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-red-500">Error: {error}</p>
+      </div>
+    );
+  }
 
-//       {/* Per-car Progress */}
-//       <div className="space-y-4">
-//         {sales.map((s, idx) => (
-//           <div key={idx}>
-//             <div className="flex justify-between text-sm mb-1">
-//               <span>{s.car}</span>
-//               <span>
-//                 {s.sold}/{s.target} cars
-//               </span>
-//             </div>
-//             <Progress value={(s.sold / s.target) * 100} className="h-2" />
-//           </div>
-//         ))}
-//       </div>
-//     </Card>
-//   );
-// }
+  return (
+    <div className="min-h-screen bg-background p-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-foreground mb-2">Analytics</h1>
+        <p className="text-muted-foreground">
+          View your dealership analytics and insights
+        </p>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Cars</CardTitle>
+            <Car className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {analytics.dealerAnalytics?.total_cars || 0}
+            </div>
+            <p className="text-xs text-muted-foreground">In inventory</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Sold Cars</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {analytics.dealerAnalytics?.sold_cars || 0}
+            </div>
+            <p className="text-xs text-muted-foreground">Total sold</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Average Price</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {analytics.dealerAnalytics
+                ? `$${analytics.dealerAnalytics.average_price.toLocaleString()}`
+                : "$0"}
+            </div>
+            <p className="text-xs text-muted-foreground">Per car</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Views</CardTitle>
+            <Eye className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {analytics.carViews.reduce(
+                (sum, car) => sum + car.total_views,
+                0
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">Car views</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Top Sellers */}
+      {topSellers.length > 0 && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Top Sellers</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {topSellers.map((seller, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center justify-between p-4 border rounded-lg"
+                >
+                  <div>
+                    <p className="font-medium">{seller.user_email}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {seller.month}/{seller.year}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-lg font-bold">{seller.total_sales}</p>
+                    <p className="text-xs text-muted-foreground">sales</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* High Sale Cars */}
+      {highSaleCars.length > 0 && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>High Sale Cars</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {highSaleCars.map((car, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center justify-between p-4 border rounded-lg"
+                >
+                  <div>
+                    <p className="font-medium">{car.car_details}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {car.month}/{car.year}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-lg font-bold">{car.sale_count}</p>
+                    <p className="text-xs text-muted-foreground">sales</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Model Stats */}
+      {analytics.dealerAnalytics?.model_stats &&
+        analytics.dealerAnalytics.model_stats.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Model Statistics</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {analytics.dealerAnalytics.model_stats.map((model, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
+                    <div>
+                      <p className="font-medium">
+                        {model.make_name} {model.model_name}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Avg: ${model.avg_price.toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold">{model.total_sold}</p>
+                      <p className="text-xs text-muted-foreground">sold</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+    </div>
+  );
+}
