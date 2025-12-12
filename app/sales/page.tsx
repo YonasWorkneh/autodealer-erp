@@ -445,19 +445,21 @@ export default function SalesPage() {
                             <SelectValue placeholder="Select car" />
                           </SelectTrigger>
                           <SelectContent>
-                            {cars.map((car) => (
-                              <SelectItem
-                                key={car.id}
-                                value={car?.id?.toString()}
-                              >
-                                {car.year} {car.make} {car.model} - $
-                                {parseFloat(
-                                  typeof car.price === "string"
-                                    ? car.price
-                                    : String(car.price)
-                                ).toLocaleString()}
-                              </SelectItem>
-                            ))}
+                            {cars
+                              .filter((car) => car && car.id)
+                              .map((car) => (
+                                <SelectItem
+                                  key={car.id}
+                                  value={car.id.toString()}
+                                >
+                                  {car.year} {car.make} {car.model} - $
+                                  {parseFloat(
+                                    typeof car.price === "string"
+                                      ? car.price
+                                      : String(car.price || "0")
+                                  ).toLocaleString()}
+                                </SelectItem>
+                              ))}
                           </SelectContent>
                         </Select>
                       </div>
@@ -705,14 +707,16 @@ export default function SalesPage() {
                               <SelectValue placeholder="Select car" />
                             </SelectTrigger>
                             <SelectContent>
-                              {cars.map((car) => (
-                                <SelectItem
-                                  key={car.id}
-                                  value={car.id.toString()}
-                                >
-                                  {car.year} {car.make} {car.model}
-                                </SelectItem>
-                              ))}
+                              {cars
+                                .filter((car) => car && car.id)
+                                .map((car) => (
+                                  <SelectItem
+                                    key={car.id}
+                                    value={car.id.toString()}
+                                  >
+                                    {car.year} {car.make} {car.model}
+                                  </SelectItem>
+                                ))}
                             </SelectContent>
                           </Select>
                         </div>

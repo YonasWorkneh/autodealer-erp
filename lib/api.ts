@@ -196,7 +196,6 @@ export async function api<T>(path: string, opts: Options = {}): Promise<T> {
     credentials: "include",
     ...rest,
   });
-  console.log(headers, "headers", accessToken, "accessToken");
 
   if (res.status === 401 && !skipAuth) {
     console.log("Got 401, attempting token refresh...");

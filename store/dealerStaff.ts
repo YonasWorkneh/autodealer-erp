@@ -29,8 +29,16 @@ export const useDealerStaffStore = create<DealerStaffState>((set, get) => ({
         method: "GET",
       });
       set({ staff: res, isLoading: false });
-    } catch (error) {
-      set({ error: (error as Error).message, isLoading: false });
+    } catch (error: any) {
+      // Silently handle 403 errors (user doesn't have permission)
+      if (
+        error?.message?.includes("403") ||
+        error?.message?.includes("Forbidden")
+      ) {
+        set({ staff: [], isLoading: false, error: null });
+      } else {
+        set({ error: (error as Error).message, isLoading: false });
+      }
     }
   },
 
