@@ -85,15 +85,17 @@ export default function page() {
     getHighSaleCars,
   } = useAnalytics();
   const { cars, fetchCars } = useCarData();
+  const [month, setMonth] = useState(() => new Date().getMonth() + 1);
+  const [year, setYear] = useState(() => new Date().getFullYear());
 
   useEffect(() => {
     fetchCars();
   }, [fetchCars]);
 
   useEffect(() => {
-    getTopSellers();
-    getHighSaleCars();
-  }, [getTopSellers, getHighSaleCars]);
+    getTopSellers(month, year);
+    getHighSaleCars(month, year);
+  }, [getTopSellers, getHighSaleCars, month, year]);
 
   const metrics = [
     {
@@ -122,7 +124,7 @@ export default function page() {
     {
       title: "Total Views",
       value: analytics.carViews
-        .reduce((sum, car) => sum + car.total_views, 0)
+        .reduce((sum, car) => sum + (car.total_unique_views || 0), 0)
         .toString(),
       positive: true,
       icon: TrendingUp,
@@ -421,8 +423,45 @@ export default function page() {
             {/* Top Sellers Section */}
             <div className="h-full">
               <Card className="p-6 shadow-none h-full">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
                   <h3 className="text-lg font-semibold">Top Sellers</h3>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <label className="flex items-center gap-1">
+                      Month
+                      <input
+                        type="number"
+                        min={1}
+                        max={12}
+                        value={month}
+                        onChange={(e) =>
+                          setMonth(Number(e.target.value) || month)
+                        }
+                        className="w-14 border rounded px-2 py-1 text-sm"
+                      />
+                    </label>
+                    <label className="flex items-center gap-1">
+                      Year
+                      <input
+                        type="number"
+                        value={year}
+                        onChange={(e) =>
+                          setYear(Number(e.target.value) || year)
+                        }
+                        className="w-16 border rounded px-2 py-1 text-sm"
+                      />
+                    </label>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs"
+                      onClick={() => {
+                        getTopSellers(month, year);
+                        getHighSaleCars(month, year);
+                      }}
+                    >
+                      Refresh
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="space-y-3">

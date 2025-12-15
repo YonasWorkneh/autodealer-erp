@@ -18,19 +18,17 @@ export const useAnalytics = () => {
 
   useEffect(() => {
     getCarViewsAnalytics();
-  }, [getCarViewsAnalytics]);
-
-  useEffect(() => {
     getDealerAnalytics();
-  }, [getDealerAnalytics]);
+  }, [getCarViewsAnalytics, getDealerAnalytics]);
 
+  // By default load current month/year
   useEffect(() => {
-    getHighSaleCars();
-  }, [getHighSaleCars]);
-
-  useEffect(() => {
-    getTopSellers();
-  }, [getTopSellers]);
+    const now = new Date();
+    const month = now.getMonth() + 1;
+    const year = now.getFullYear();
+    getHighSaleCars(month, year);
+    getTopSellers(month, year);
+  }, [getHighSaleCars, getTopSellers]);
 
   return {
     analytics,

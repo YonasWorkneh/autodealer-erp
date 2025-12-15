@@ -1,3 +1,28 @@
+export interface CarImage {
+  id: number;
+  car: number;
+  image_url: string;
+  is_featured: boolean;
+  caption: string;
+  image: string;
+  uploaded_at: string;
+}
+
+export interface CarBid {
+  id: number;
+  car_detail: {
+    make: string;
+    model: string;
+  };
+  profile: {
+    first_name: string;
+    last_name: string;
+    contact: string;
+  };
+  amount: string;
+  created_at: string;
+}
+
 export interface Car {
   id: number;
   make: string;
@@ -89,27 +114,20 @@ export interface Car {
   vhs_player: boolean;
   winch: boolean;
 
-  images:
-    | Array<{
-        id: number;
-        car: number;
-        image_url: string;
-        is_featured: boolean;
-        caption: string;
-        uploaded_at: string;
-      }>
-    | string[];
+  images: Array<CarImage> | string[];
   dealer: number | null;
   broker: number | null;
   posted_by: number;
   make_ref: number;
   model_ref: number;
+  vin?: string | null;
+  origin?: string | null;
   verification_status: "pending" | "verified" | "rejected";
   dealer_average_rating: number | null;
   broker_average_rating: number | null;
   created_at: string;
   updated_at: string;
-  bids: any[];
+  bids: CarBid[];
 }
 
 export interface Expense {

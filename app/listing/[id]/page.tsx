@@ -76,6 +76,26 @@ export default function CarDetailPage() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [showAllUsers, setShowAllUsers] = useState(false);
 
+  const getDisplayPrice = (carData: any) => {
+    if (
+      carData?.sale_type === "auction" &&
+      carData.bids &&
+      carData.bids.length > 0
+    ) {
+      const highestBid = Math.max(
+        ...carData.bids
+          .map((b: any) => parseFloat(b.amount))
+          .filter((n: number) => !Number.isNaN(n))
+      );
+      return highestBid;
+    }
+    const priceValue =
+      typeof carData?.price === "string"
+        ? parseFloat(carData.price)
+        : Number(carData?.price);
+    return Number.isNaN(priceValue) ? 0 : priceValue;
+  };
+
   useEffect(() => {
     if (params.id) {
       fetchCarById(params.id as string);
@@ -224,36 +244,53 @@ export default function CarDetailPage() {
                           Pending Review
                         </Badge>
                       )}
-                      <Badge
-                        variant="secondary"
-                        className={`${
-                          car.status === "available"
-                            ? "bg-blue-100 text-blue-800 hover:bg-blue-100"
-                            : car.status === "sold"
-                            ? "bg-gray-100 text-gray-800 hover:bg-gray-100"
-                            : "bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
-                        }`}
-                      >
-                        {car.status.charAt(0).toUpperCase() +
-                          car.status.slice(1)}
-                      </Badge>
+                      {car.verification_status !== "rejected" && (
+                        <Badge
+                          variant="secondary"
+                          className={`${
+                            car.status === "available"
+                              ? "bg-blue-100 text-blue-800 hover:bg-blue-100"
+                              : car.status === "sold"
+                              ? "bg-gray-100 text-gray-800 hover:bg-gray-100"
+                              : "bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
+                          }`}
+                        >
+                          {car.status.charAt(0).toUpperCase() +
+                            car.status.slice(1)}
+                        </Badge>
+                      )}
                       <Badge variant="outline" className="capitalize">
                         {car.condition}
                       </Badge>
                     </div>
                     <div className="text-3xl font-bold text-primary mt-2">
-                      $
-                      {parseFloat(
-                        typeof car.price === "string"
-                          ? car.price
-                          : String(car.price)
-                      ).toLocaleString()}
+                      ${getDisplayPrice(car).toLocaleString()}
                     </div>
                     <Badge variant="secondary" className="mt-2">
                       {car.sale_type === "fixed_price"
                         ? "Fixed Price"
                         : "Auction"}
                     </Badge>
+                    {(car.vin || car.origin) && (
+                      <div className="mt-3 flex gap-4 text-sm text-muted-foreground">
+                        {car.vin && (
+                          <span className="flex items-center gap-1">
+                            <span className="font-medium text-foreground">
+                              VIN:
+                            </span>
+                            <span className="uppercase">{car.vin}</span>
+                          </span>
+                        )}
+                        {car.origin && (
+                          <span className="flex items-center gap-1">
+                            <span className="font-medium text-foreground">
+                              Origin:
+                            </span>
+                            <span className="capitalize">{car.origin}</span>
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -482,15 +519,61 @@ export default function CarDetailPage() {
                     Auction Bids
                   </h2>
                   {car.bids && car.bids.length > 0 ? (
-                    <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground">
-                        {car.bids.length} bid(s) received
-                      </p>
-                      {car.auction_end && (
+                    <div className="space-y-3">
+                      <div className="space-y-1">
                         <p className="text-sm text-muted-foreground">
-                          Ends: {new Date(car.auction_end).toLocaleString()}
+                          {car.bids.length} bid(s) received
                         </p>
-                      )}
+                        <p className="text-sm">
+                          Highest bid:{" "}
+                          <span className="font-semibold">
+                            ${getDisplayPrice(car).toLocaleString()}
+                          </span>
+                        </p>
+                        {car.auction_end && (
+                          <p className="text-sm text-muted-foreground">
+                            Ends: {new Date(car.auction_end).toLocaleString()}
+                          </p>
+                        )}
+                      </div>
+                      <div className="divide-y divide-gray-200 border rounded-lg">
+                        {car.bids.map((bid, idx) => (
+                          <div
+                            key={bid.id || idx}
+                            className="p-3 text-sm space-y-2"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <span className="font-medium">
+                                  {bid.profile?.first_name}{" "}
+                                  {bid.profile?.last_name}
+                                </span>
+                                {bid.car_detail && (
+                                  <span className="text-muted-foreground ml-2 text-xs">
+                                    ({bid.car_detail.make}{" "}
+                                    {bid.car_detail.model})
+                                  </span>
+                                )}
+                              </div>
+                              <span className="font-semibold text-primary">
+                                ${parseFloat(bid.amount).toLocaleString()}
+                              </span>
+                            </div>
+                            {bid.profile?.contact && (
+                              <div className="flex items-center gap-2">
+                                <Phone className="h-3 w-3 text-muted-foreground" />
+                                <span className="text-muted-foreground text-xs">
+                                  {bid.profile.contact}
+                                </span>
+                              </div>
+                            )}
+                            <p className="text-muted-foreground text-xs">
+                              Placed:{" "}
+                              {new Date(bid.created_at).toLocaleString()}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground">No bids yet</p>

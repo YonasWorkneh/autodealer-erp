@@ -3,6 +3,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { BarChart3, TrendingUp, Car, DollarSign, Eye } from "lucide-react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 export default function AnalyticsPage() {
   const {
@@ -11,7 +13,11 @@ export default function AnalyticsPage() {
     highSaleCars,
     isLoading,
     error,
+    getTopSellers,
+    getHighSaleCars,
   } = useAnalytics();
+  const [month, setMonth] = useState(() => new Date().getMonth() + 1);
+  const [year, setYear] = useState(() => new Date().getFullYear());
 
   if (isLoading) {
     return (
@@ -32,10 +38,49 @@ export default function AnalyticsPage() {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground mb-2">Analytics</h1>
-        <p className="text-muted-foreground">
-          View your dealership analytics and insights
-        </p>
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              Analytics
+            </h1>
+            <p className="text-muted-foreground">
+              View your dealership analytics and insights
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2 items-center text-sm text-muted-foreground">
+            <label className="flex items-center gap-1">
+              Month
+              <input
+                type="number"
+                min={1}
+                max={12}
+                value={month}
+                onChange={(e) => setMonth(Number(e.target.value) || month)}
+                className="w-14 border rounded px-2 py-1 text-sm"
+              />
+            </label>
+            <label className="flex items-center gap-1">
+              Year
+              <input
+                type="number"
+                value={year}
+                onChange={(e) => setYear(Number(e.target.value) || year)}
+                className="w-16 border rounded px-2 py-1 text-sm"
+              />
+            </label>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs"
+              onClick={() => {
+                getTopSellers(month, year);
+                getHighSaleCars(month, year);
+              }}
+            >
+              Refresh
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -89,7 +134,7 @@ export default function AnalyticsPage() {
           <CardContent>
             <div className="text-2xl font-bold">
               {analytics.carViews.reduce(
-                (sum, car) => sum + car.total_views,
+                (sum, car) => sum + (car.total_unique_views || 0),
                 0
               )}
             </div>

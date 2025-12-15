@@ -5,7 +5,8 @@ interface CarView {
   car_id: number;
   car_make: string;
   car_model: string;
-  total_views: number;
+  total_unique_views: number;
+  viewer_emails: string[];
 }
 
 interface ModelStats {
@@ -50,8 +51,8 @@ interface AnalyticsState {
   highSaleCars: HighSaleCar[];
   getCarViewsAnalytics: () => Promise<void>;
   getDealerAnalytics: () => Promise<void>;
-  getHighSaleCars: () => Promise<void>;
-  getTopSellers: () => Promise<void>;
+  getHighSaleCars: (month?: number, year?: number) => Promise<void>;
+  getTopSellers: (month?: number, year?: number) => Promise<void>;
 }
 
 export const useAnalyticsStore = create<AnalyticsState>((set) => ({
@@ -66,12 +67,9 @@ export const useAnalyticsStore = create<AnalyticsState>((set) => ({
   getCarViewsAnalytics: async () => {
     set({ isLoading: true, error: null });
     try {
-      const res = await api<CarView[]>(
-        "/inventory/car-views/dealer-analytics/",
-        {
-          method: "GET",
-        }
-      );
+      const res = await api<CarView[]>("/analytics/dealer-view-analytics/", {
+        method: "GET",
+      });
       set((state) => ({
         analytics: { ...state.analytics, carViews: res },
         isLoading: false,
@@ -83,12 +81,9 @@ export const useAnalyticsStore = create<AnalyticsState>((set) => ({
   getDealerAnalytics: async () => {
     set({ isLoading: true, error: null });
     try {
-      const res = await api<DealerAnalytics>(
-        "/inventory/cars/dealer-analytics/",
-        {
-          method: "GET",
-        }
-      );
+      const res = await api<DealerAnalytics>("/analytics/dealer-analytics/", {
+        method: "GET",
+      });
       set((state) => ({
         analytics: { ...state.analytics, dealerAnalytics: res },
         isLoading: false,
@@ -97,13 +92,21 @@ export const useAnalyticsStore = create<AnalyticsState>((set) => ({
       set({ error: (error as Error).message, isLoading: false });
     }
   },
-  getHighSaleCars: async () => {
+  getHighSaleCars: async (month?: number, year?: number) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await api<HighSaleCar[]>("/dealers/high-sale-cars/", {
-        method: "GET",
-      });
-      
+      const now = new Date();
+      const params = new URLSearchParams();
+      params.append("month", String(month ?? now.getMonth() + 1));
+      params.append("year", String(year ?? now.getFullYear()));
+
+      const res = await api<HighSaleCar[]>(
+        `/analytics/high-sales-cars/?${params.toString()}`,
+        {
+          method: "GET",
+        }
+      );
+
       set((state) => ({
         highSaleCars: res,
         isLoading: false,
@@ -113,15 +116,17 @@ export const useAnalyticsStore = create<AnalyticsState>((set) => ({
       set({ error: (error as Error).message, isLoading: false });
     }
   },
-  getTopSellers: async () => {
+  getTopSellers: async (month?: number, year?: number) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await api<TopSeller[]>(
-        "/dealers/top-sellers/",
+      const now = new Date();
+      const params = new URLSearchParams();
+      params.append("month", String(month ?? now.getMonth() + 1));
+      params.append("year", String(year ?? now.getFullYear()));
 
-        {
-          method: "GET",
-        }
+      const res = await api<TopSeller[]>(
+        `/analytics/top-sellers/?${params.toString()}`,
+        { method: "GET" }
       );
       console.log("Top sellers response:", res);
       set((state) => ({

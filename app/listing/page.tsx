@@ -52,6 +52,22 @@ export default function page() {
   const router = useRouter();
   const userRole = useUserRole();
 
+  const getDisplayPrice = (car: any) => {
+    if (car.sale_type === "auction" && car.bids && car.bids.length > 0) {
+      const highestBid = Math.max(
+        ...car.bids
+          .map((b: any) => parseFloat(b.amount))
+          .filter((n: number) => !Number.isNaN(n))
+      );
+      return highestBid;
+    }
+    const priceValue =
+      typeof car.price === "string" ? parseFloat(car.price) : Number(car.price);
+    return Number.isNaN(priceValue) ? 0 : priceValue;
+  };
+
+  console.log("cars ", cars);
+
   useEffect(() => {
     fetchCars();
   }, [fetchCars]);
@@ -183,16 +199,20 @@ export default function page() {
                       </Badge>
                     )}
 
-                    {/* Status */}
-                    {car.status === "available" && (
-                      <Badge className="bg-blue-500 text-white rounded-full">
-                        Available
-                      </Badge>
-                    )}
-                    {car.status === "sold" && (
-                      <Badge className="bg-gray-500 text-white rounded-full">
-                        Sold
-                      </Badge>
+                    {/* Status (hidden when verification rejected) */}
+                    {car.verification_status !== "rejected" && (
+                      <>
+                        {car.status === "available" && (
+                          <Badge className="bg-blue-500 text-white rounded-full">
+                            Available
+                          </Badge>
+                        )}
+                        {car.status === "sold" && (
+                          <Badge className="bg-gray-500 text-white rounded-full">
+                            Sold
+                          </Badge>
+                        )}
+                      </>
                     )}
 
                     {/* Condition */}
@@ -252,6 +272,28 @@ export default function page() {
                     </div>
                   </div>
 
+                  {/* VIN / Origin */}
+                  {(car.vin || car.origin) && (
+                    <div className="flex gap-4 text-xs text-muted-foreground mb-3">
+                      {car.vin && (
+                        <div className="flex items-center gap-1">
+                          <span className="font-medium text-foreground">
+                            VIN:
+                          </span>
+                          <span className="uppercase">{car.vin}</span>
+                        </div>
+                      )}
+                      {car.origin && (
+                        <div className="flex items-center gap-1">
+                          <span className="font-medium text-foreground">
+                            Origin:
+                          </span>
+                          <span className="capitalize">{car.origin}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {/* Color Info */}
                   <div className="flex gap-4 text-xs text-muted-foreground mb-3">
                     <div className="flex items-center gap-1">
@@ -281,12 +323,7 @@ export default function page() {
                   {/* Price */}
                   <div className="flex items-center justify-between">
                     <div className="text-2xl font-bold text-primary">
-                      $
-                      {parseFloat(
-                        typeof car.price === "string"
-                          ? car.price
-                          : String(car.price)
-                      ).toLocaleString()}
+                      ${getDisplayPrice(car).toLocaleString()}
                     </div>
                     {car.images && car.images.length > 1 && (
                       <span className="text-xs text-muted-foreground">
