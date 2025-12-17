@@ -37,7 +37,7 @@ interface AccountingState {
     dealerId: number,
     month?: number,
     year?: number
-  ) => Promise<void>;
+  ) => Promise<FinancialReport>;
   updateFinancialReport: (
     id: number,
     report: Partial<Omit<FinancialReport, "id" | "created_at">>
@@ -197,6 +197,13 @@ export const useAccountingStore = create<AccountingState>((set, get) => ({
   generateFinancialReport: async (type, dealerId, month, year) => {
     set({ isLoading: true, error: null });
     try {
+      // Validate dealerId
+      if (!dealerId || isNaN(Number(dealerId))) {
+        throw new Error(
+          "Invalid dealer ID. Please ensure you are logged in as a dealer."
+        );
+      }
+
       const params = new URLSearchParams();
       params.append("type", type);
       if (month) params.append("month", String(month));
@@ -206,15 +213,22 @@ export const useAccountingStore = create<AccountingState>((set, get) => ({
         `/accounting/financial-reports/generate/?${params.toString()}`,
         {
           method: "POST",
-          body: { type, dealer: dealerId, data: "" } as any,
+          body: {
+            type,
+            dealer: Number(dealerId),
+            data: "",
+          } as any,
         }
       );
       set((state) => ({
         financialReports: [res, ...state.financialReports],
         isLoading: false,
       }));
+      return res;
     } catch (error) {
-      set({ error: (error as Error).message, isLoading: false });
+      const errorMessage =
+        (error as Error).message || "Failed to generate financial report.";
+      set({ error: errorMessage, isLoading: false });
       throw error;
     }
   },

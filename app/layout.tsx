@@ -5,6 +5,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
+import RoleRedirect from "@/components/RoleRedirect";
 import { cookies } from "next/headers";
 import Protected from "./Protected";
 
@@ -38,6 +39,7 @@ html {
         <div className="root">
           <Protected isLogged={isLogged}>
             <>
+              <RoleRedirect />
               {/* sidebar */}
               <Sidebar />
               <main className="flex-1 ml-16 overflow-y-auto max-h-screen p-4 py-0 bg-white pt-20">

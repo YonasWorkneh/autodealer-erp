@@ -167,7 +167,7 @@ export default function AccountingPage() {
               createExpense={createExpense}
               updateExpense={updateExpense}
               deleteExpense={deleteExpense}
-              dealerId={dealer?.id}
+              dealerId={1}
             />
           </TabsContent>
 
@@ -178,7 +178,7 @@ export default function AccountingPage() {
               createCarExpense={createCarExpense}
               updateCarExpense={updateCarExpense}
               deleteCarExpense={deleteCarExpense}
-              dealerId={dealer?.id}
+              dealerId={1}
             />
           </TabsContent>
 
@@ -199,7 +199,7 @@ export default function AccountingPage() {
               fetchFinancialReport={fetchFinancialReport}
               updateFinancialReport={updateFinancialReport}
               deleteFinancialReport={deleteFinancialReport}
-              dealerId={dealer?.id}
+              dealerId={1}
             />
           </TabsContent>
 
@@ -209,7 +209,7 @@ export default function AccountingPage() {
               createRevenue={createRevenue}
               updateRevenue={updateRevenue}
               deleteRevenue={deleteRevenue}
-              dealerId={dealer?.id}
+              dealerId={1}
             />
           </TabsContent>
         </Tabs>

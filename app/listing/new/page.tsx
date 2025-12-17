@@ -228,6 +228,18 @@ export default function PostCarScreen() {
     }
   }, []);
 
+  // Clear model selection when make changes
+  useEffect(() => {
+    if (selectedMakeId) {
+      setSelectedModelId(null);
+      setFormData((prev) => ({
+        ...prev,
+        model: "",
+        model_ref: 0,
+      }));
+    }
+  }, [selectedMakeId]);
+
   const featureCategories = {
     "Comfort & Convenience": [
       "bluetooth",
@@ -372,13 +384,17 @@ export default function PostCarScreen() {
     if (!e.target.files) return;
     const files = Array.from(e.target.files);
 
-    const newImages: CarImage[] = files.map((file, index) => ({
-      image_file: URL.createObjectURL(file),
-      is_feature:
-        formData.uploaded_images.length === 0 && index === 0 ? "True" : "False",
-      caption: formData.description || "Caption",
-      file: file, // Store the actual file object
-    }));
+    const newImages: CarImage[] = files
+      .filter((file): file is File => file instanceof File)
+      .map((file, index) => ({
+        image_file: URL.createObjectURL(file),
+        is_feature:
+          formData.uploaded_images.length === 0 && index === 0
+            ? "True"
+            : "False",
+        caption: formData.description || "Caption",
+        file: file,
+      }));
 
     setFormData((prev) => ({
       ...prev,
@@ -439,6 +455,34 @@ export default function PostCarScreen() {
       toast({
         title: "Error",
         description: "Dealer information not loaded. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate required fields
+    if (!formData.make_ref || formData.make_ref === 0) {
+      toast({
+        title: "Error",
+        description: "Please select a make.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.model_ref || formData.model_ref === 0) {
+      toast({
+        title: "Error",
+        description: "Please select a model.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.uploaded_images.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please upload at least one image.",
         variant: "destructive",
       });
       return;
@@ -536,26 +580,23 @@ export default function PostCarScreen() {
         );
       });
 
-      // Add images with metadata
       formData.uploaded_images.forEach((image, index) => {
-        if (image.file) {
-          carData.append(`uploaded_images[${index}].image_file`, image.file);
+        if (image.file instanceof File) {
+          carData.append(`uploaded_images[${index}][image]`, image.file);
           carData.append(
-            `uploaded_images[${index}].is_featured`,
-            image.is_feature
+            `uploaded_images[${index}][is_featured]`,
+            image.is_feature === "True" ? "true" : "false"
           );
-          carData.append(`uploaded_images[${index}].caption`, image.caption);
+          carData.append(
+            `uploaded_images[${index}][caption]`,
+            image.caption || "Image"
+          );
+        } else {
+          console.error(`Image at index ${index} has no file:`, image);
         }
       });
 
-      // Console log for debugging (FormData content)
-      console.log("=== POSTING CAR DATA ===");
-      console.log("Dealer ID:", dealer.id);
-      console.log("Images count:", formData.uploaded_images.length);
-      console.log("========================");
-
       const res = await postCar(carData);
-      console.log("Response from car post:", res);
 
       toast({
         title: "Success",
@@ -575,7 +616,18 @@ export default function PostCarScreen() {
   };
 
   const filteredModels = selectedMakeId
-    ? models.filter((model) => model.make && model.make.id === selectedMakeId)
+    ? models.filter((model) => {
+        if ((model as any).make_id !== undefined) {
+          return (model as any).make_id === selectedMakeId;
+        }
+        if (model.make?.id) {
+          return model.make.id === selectedMakeId;
+        }
+        if ((model as any).make_ref !== undefined) {
+          return (model as any).make_ref === selectedMakeId;
+        }
+        return true;
+      })
     : [];
 
   return (

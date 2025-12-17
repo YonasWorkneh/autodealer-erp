@@ -11,6 +11,8 @@ export interface Make {
 export interface Model {
   id: number;
   name: string;
+  make_id?: number;
+  make_name?: string;
   make?: Make;
 }
 
@@ -82,21 +84,17 @@ export const useCarStore = create<CarState>((set) => ({
     try {
       let res: Car;
 
-      // Use different endpoints based on role
       if (role === "seller") {
-        // Sellers use the general cars endpoint
         try {
           res = await api<Car>(`/inventory/cars/${id}/`, {
             method: "GET",
           });
         } catch (error) {
-          // Fallback to user-cars if general endpoint doesn't work
           res = await api<Car>(`/inventory/user-cars/${id}`, {
             method: "GET",
           });
         }
       } else {
-        // Dealers and other roles use user-cars endpoint
         res = await api<Car>(`/inventory/user-cars/${id}`, {
           method: "GET",
         });

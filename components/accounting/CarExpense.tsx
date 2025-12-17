@@ -62,20 +62,24 @@ export function CarExpenseComponent({
   const [editingExpense, setEditingExpense] = useState<CarExpense | null>(null);
 
   const [form, setForm] = useState<{
+    vin_code: string;
+    origin: string;
     description: string;
     amount: string;
     currency: "USD" | "ETB";
     converted_amount: string;
-    date: string;
-    dealer?: number;
+    created_at: string;
+    company?: number;
     car: number | "";
   }>({
+    vin_code: "",
+    origin: "",
     description: "",
     amount: "",
     currency: "USD",
     converted_amount: "",
-    date: new Date().toISOString().split("T")[0],
-    dealer: dealerId,
+    created_at: new Date().toISOString(),
+    company: dealerId,
     car: "",
   });
 
@@ -88,7 +92,7 @@ export function CarExpenseComponent({
       }
       const payload = {
         ...form,
-        dealer: dealerId,
+        company: dealerId,
         car: Number(form.car),
       } as any;
 
@@ -100,12 +104,14 @@ export function CarExpenseComponent({
       setShowDialog(false);
       setEditingExpense(null);
       setForm({
+        vin_code: "",
+        origin: "",
         description: "",
         amount: "",
         currency: "USD",
         converted_amount: "",
-        date: new Date().toISOString().split("T")[0],
-        dealer: dealerId,
+        created_at: new Date().toISOString(),
+        company: dealerId,
         car: "",
       });
     } catch (error) {
@@ -116,12 +122,14 @@ export function CarExpenseComponent({
   const handleEdit = (expense: CarExpense) => {
     setEditingExpense(expense);
     setForm({
+      vin_code: expense.vin_code || "",
+      origin: expense.origin || "",
       description: expense.description,
       amount: expense.amount,
-      currency: expense.currency,
+      currency: expense.currency as "USD" | "ETB",
       converted_amount: expense.converted_amount,
-      date: expense.date,
-      dealer: dealerId,
+      created_at: expense.created_at,
+      company: dealerId,
       car: expense.car,
     });
     setShowDialog(true);
@@ -200,12 +208,17 @@ export function CarExpenseComponent({
                   <Label htmlFor="car">Car</Label>
                   <Select
                     value={String(form.car || "")}
-                    onValueChange={(value) =>
+                    onValueChange={(value) => {
+                      const selectedCar = cars.find(
+                        (c) => c.id === Number(value)
+                      );
                       setForm({
                         ...form,
                         car: Number(value),
-                      })
-                    }
+                        vin_code: selectedCar?.vin || "",
+                        origin: selectedCar?.origin || "",
+                      });
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a car" />
@@ -218,6 +231,36 @@ export function CarExpenseComponent({
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="vin_code">VIN Code</Label>
+                    <Input
+                      id="vin_code"
+                      value={form.vin_code}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          vin_code: e.target.value,
+                        })
+                      }
+                      placeholder="Enter VIN code"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="origin">Origin</Label>
+                    <Input
+                      id="origin"
+                      value={form.origin}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          origin: e.target.value,
+                        })
+                      }
+                      placeholder="Enter origin"
+                    />
+                  </div>
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="description">Description</Label>
@@ -275,15 +318,21 @@ export function CarExpenseComponent({
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="date">Date</Label>
+                  <Label htmlFor="created_at">Date</Label>
                   <Input
-                    id="date"
-                    type="date"
-                    value={form.date}
+                    id="created_at"
+                    type="datetime-local"
+                    value={
+                      form.created_at
+                        ? new Date(form.created_at).toISOString().slice(0, 16)
+                        : ""
+                    }
                     onChange={(e) =>
                       setForm({
                         ...form,
-                        date: e.target.value,
+                        created_at: e.target.value
+                          ? new Date(e.target.value).toISOString()
+                          : new Date().toISOString(),
                       })
                     }
                     required

@@ -55,12 +55,12 @@ export function GeneralExpense({
   const [filterType, setFilterType] = useState<string>("all");
 
   const [form, setForm] = useState<{
-    type: "maintenance" | "marketing" | "oprational" | "other";
+    type: string;
     amount: string;
     description: string;
     dealer?: number;
   }>({
-    type: "maintenance",
+    type: "",
     amount: "",
     dealer: dealerId,
     description: "",
@@ -96,7 +96,7 @@ export function GeneralExpense({
       setShowDialog(false);
       setEditingExpense(null);
       setForm({
-        type: "maintenance",
+        type: "",
         amount: "",
         description: "",
         dealer: dealerId,
@@ -171,25 +171,18 @@ export function GeneralExpense({
                 <div className="grid gap-4 py-4">
                   <div className="grid gap-2">
                     <Label htmlFor="type">Type</Label>
-                    <Select
+                    <Input
+                      id="type"
                       value={form.type}
-                      onValueChange={(value) =>
+                      onChange={(e) =>
                         setForm({
                           ...form,
-                          type: value as any,
+                          type: e.target.value,
                         })
                       }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="maintenance">Maintenance</SelectItem>
-                        <SelectItem value="marketing">Marketing</SelectItem>
-                        <SelectItem value="oprational">Operational</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      placeholder="Enter expense type (e.g., maintenance, marketing, operational, other)"
+                      required
+                    />
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="amount">Amount</Label>
@@ -232,7 +225,7 @@ export function GeneralExpense({
                       setShowDialog(false);
                       setEditingExpense(null);
                       setForm({
-                        type: "maintenance",
+                        type: "",
                         amount: "",
                         description: "",
                         dealer: dealerId,

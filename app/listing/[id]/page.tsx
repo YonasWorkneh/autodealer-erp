@@ -142,7 +142,7 @@ export default function CarDetailPage() {
   if (!car) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <p className="text-muted-foreground">Car not found</p>
+        <p className="text-muted-foreground">Loading car details...</p>
       </div>
     );
   }

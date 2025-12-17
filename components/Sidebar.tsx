@@ -47,9 +47,6 @@ export default function Sidebar() {
   const { dealer } = useProfile();
   const isAuthPage = pathName.includes("signin") || pathName.includes("signup");
 
-  console.log("userRole", userRole);
-  console.log("dealer", dealer?.role);
-
   const links = useMemo(() => {
     return allLinks.filter((link) => link.roles.includes(userRole));
   }, [userRole]);

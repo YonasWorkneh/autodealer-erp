@@ -9,6 +9,8 @@ import {
   Download,
   MoreHorizontal,
   Eye,
+  FileSpreadsheet,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,7 +51,7 @@ interface FinancialReportProps {
     dealerId: number,
     month?: number,
     year?: number
-  ) => Promise<void>;
+  ) => Promise<FinancialReport>;
   fetchFinancialReport: (id: number) => Promise<FinancialReport>;
   updateFinancialReport: (
     id: number,
@@ -105,7 +107,14 @@ export function FinancialReportComponent({
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!dealerId) {
-      alert("Dealer information is required to generate reports.");
+      alert(
+        "Dealer information is required to generate reports. Please ensure you are logged in as a dealer."
+      );
+      return;
+    }
+
+    if (!dealerId || isNaN(Number(dealerId))) {
+      alert("Invalid dealer ID. Please refresh the page and try again.");
       return;
     }
 
@@ -113,7 +122,7 @@ export function FinancialReportComponent({
     try {
       await generateFinancialReport(
         form.type,
-        dealerId,
+        Number(dealerId),
         parseInt(form.month),
         parseInt(form.year)
       );
@@ -123,9 +132,11 @@ export function FinancialReportComponent({
         month: String(currentMonth),
         year: String(currentYear),
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating report:", error);
-      alert("Failed to generate report. Please try again.");
+      const errorMessage =
+        error?.message || "Failed to generate report. Please try again.";
+      alert(errorMessage);
     } finally {
       setIsGenerating(false);
     }
@@ -159,7 +170,7 @@ export function FinancialReportComponent({
     }
   };
 
-  const handleDownload = async (report: FinancialReport) => {
+  const handleDownloadExcel = async (report: FinancialReport) => {
     try {
       // Ensure we have the latest report data
       let reportData = report;
@@ -273,8 +284,168 @@ export function FinancialReportComponent({
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("Error downloading report:", error);
-      alert("Failed to download report.");
+      console.error("Error downloading Excel report:", error);
+      alert("Failed to download Excel report.");
+    }
+  };
+
+  const handleDownloadPDF = async (report: FinancialReport) => {
+    try {
+      // Ensure we have the latest report data
+      let reportData = report;
+      if (!report.data) {
+        reportData = await fetchFinancialReport(report.id);
+      }
+
+      // Parse the report data
+      let parsedData: any;
+      if (typeof reportData.data === "string") {
+        try {
+          parsedData = JSON.parse(reportData.data);
+        } catch {
+          parsedData = { content: reportData.data };
+        }
+      } else {
+        parsedData = reportData.data;
+      }
+
+      // Create HTML content for PDF
+      let htmlContent = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>${reportData.type
+              .replace("_", " ")
+              .toUpperCase()} Report</title>
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                padding: 20px;
+                color: #333;
+              }
+              h1 {
+                color: #1a1a1a;
+                border-bottom: 2px solid #333;
+                padding-bottom: 10px;
+                margin-bottom: 20px;
+              }
+              .header {
+                margin-bottom: 20px;
+                color: #666;
+              }
+              table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+              }
+              table th, table td {
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+              }
+              table th {
+                background-color: #f2f2f2;
+                font-weight: bold;
+              }
+              .key-value {
+                margin: 10px 0;
+              }
+              .key {
+                font-weight: bold;
+                display: inline-block;
+                width: 200px;
+              }
+              pre {
+                white-space: pre-wrap;
+                font-family: 'Courier New', monospace;
+                background: #f5f5f5;
+                padding: 15px;
+                border-radius: 5px;
+              }
+            </style>
+          </head>
+          <body>
+            <h1>${reportData.type.replace("_", " ").toUpperCase()} REPORT</h1>
+            <div class="header">
+              <p><strong>Created:</strong> ${new Date(
+                reportData.created_at
+              ).toLocaleString()}</p>
+              <p><strong>Type:</strong> ${reportData.type.replace("_", " ")}</p>
+            </div>
+      `;
+
+      // Format data based on structure
+      if (typeof parsedData === "object" && parsedData !== null) {
+        if (Array.isArray(parsedData)) {
+          // Array format - create table
+          if (parsedData.length > 0) {
+            htmlContent += "<table><thead><tr>";
+            const headers = Object.keys(parsedData[0]);
+            headers.forEach((header) => {
+              htmlContent += `<th>${header}</th>`;
+            });
+            htmlContent += "</tr></thead><tbody>";
+            parsedData.forEach((row: any) => {
+              htmlContent += "<tr>";
+              headers.forEach((header) => {
+                htmlContent += `<td>${row[header] ?? ""}</td>`;
+              });
+              htmlContent += "</tr>";
+            });
+            htmlContent += "</tbody></table>";
+          }
+        } else {
+          // Object format - create key-value pairs
+          htmlContent += "<div>";
+          Object.entries(parsedData).forEach(([key, value]) => {
+            const val =
+              typeof value === "object"
+                ? JSON.stringify(value, null, 2)
+                : String(value);
+            htmlContent += `
+              <div class="key-value">
+                <span class="key">${key}:</span>
+                <span>${val}</span>
+              </div>
+            `;
+          });
+          htmlContent += "</div>";
+        }
+      } else {
+        // Plain text
+        htmlContent += `<pre>${String(parsedData.content || parsedData)}</pre>`;
+      }
+
+      htmlContent += `
+          </body>
+        </html>
+      `;
+
+      // Create a new window and print to PDF
+      const printWindow = window.open("", "_blank");
+      if (printWindow) {
+        printWindow.document.write(htmlContent);
+        printWindow.document.close();
+        printWindow.onload = () => {
+          printWindow.print();
+        };
+      } else {
+        // Fallback: create downloadable HTML file
+        const blob = new Blob([htmlContent], { type: "text/html" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${reportData.type}_${
+          new Date(reportData.created_at).toISOString().split("T")[0]
+        }.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error("Error downloading PDF report:", error);
+      alert("Failed to download PDF report.");
     }
   };
 
@@ -431,9 +602,15 @@ export function FinancialReportComponent({
                       <Eye className="h-4 w-4 mr-2" />
                       View Details
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleDownload(report)}>
-                      <Download className="h-4 w-4 mr-2" />
-                      Download
+                    <DropdownMenuItem
+                      onClick={() => handleDownloadExcel(report)}
+                    >
+                      <FileSpreadsheet className="h-4 w-4 mr-2" />
+                      Download Excel
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleDownloadPDF(report)}>
+                      <FileText className="h-4 w-4 mr-2" />
+                      Download PDF
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => handleDelete(report.id)}
@@ -501,11 +678,20 @@ export function FinancialReportComponent({
             <Button
               variant="outline"
               onClick={() => {
-                viewingReport && handleDownload(viewingReport);
+                viewingReport && handleDownloadExcel(viewingReport);
               }}
             >
-              <Download className="h-4 w-4 mr-2" />
-              Download
+              <FileSpreadsheet className="h-4 w-4 mr-2" />
+              Excel
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                viewingReport && handleDownloadPDF(viewingReport);
+              }}
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              PDF
             </Button>
             <Button onClick={() => setShowViewDialog(false)}>Close</Button>
           </DialogFooter>

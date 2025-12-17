@@ -193,12 +193,14 @@ export interface CreateDealerStaffRequest {
 
 export interface CarExpense {
   id: number;
+  vin_code: string;
+  origin: string;
   description: string;
   amount: string;
-  currency: "USD" | "ETB";
+  currency: "USD" | "ETB" | string;
   converted_amount: string;
-  date: string;
-  dealer: number;
+  created_at: string;
+  company: number;
   car: number;
 }
 
