@@ -258,7 +258,8 @@ export function GeneralExpense({
                         {expense.type}
                       </Badge>
                       <span className="font-medium">
-                        ${Math.abs(parseFloat(expense.amount)).toLocaleString()}
+                        {Math.abs(parseFloat(expense.amount)).toLocaleString()}{" "}
+                        ETB
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground">

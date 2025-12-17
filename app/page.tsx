@@ -115,8 +115,8 @@ export default function page() {
     {
       title: "Average Price",
       value: analytics.dealerAnalytics
-        ? `$${analytics.dealerAnalytics.average_price.toLocaleString()}`
-        : "$0",
+        ? `${analytics.dealerAnalytics.average_price.toLocaleString()} ETB`
+        : "0 ETB",
       positive: true,
       icon: DollarSign,
       comparison: "vs last week",
@@ -402,12 +402,12 @@ export default function page() {
                           {car.year}
                         </span>
                         <span className="text-sm text-gray-500">
-                          $
                           {parseFloat(
                             typeof car.price === "string"
                               ? car.price
                               : String(car.price)
-                          ).toLocaleString()}
+                          ).toLocaleString()}{" "}
+                          ETB
                         </span>
                       </div>
                     ))

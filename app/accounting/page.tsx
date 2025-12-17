@@ -99,7 +99,7 @@ export default function AccountingPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                ${Math.abs(totalExpenses).toLocaleString()}
+                {Math.abs(totalExpenses).toLocaleString()} ETB
               </div>
               <p className="text-xs text-muted-foreground">
                 {expenses.length} transactions
@@ -114,7 +114,6 @@ export default function AccountingPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                $
                 {Math.abs(
                   expenses
                     .filter(() => true)
@@ -122,7 +121,8 @@ export default function AccountingPage() {
                       (sum, expense) => sum + parseFloat(expense.amount),
                       0
                     )
-                ).toLocaleString()}
+                ).toLocaleString()}{" "}
+                ETB
               </div>
               <p className="text-xs text-muted-foreground">
                 Current month expenses

@@ -264,7 +264,7 @@ export default function CarDetailPage() {
                       </Badge>
                     </div>
                     <div className="text-3xl font-bold text-primary mt-2">
-                      ${getDisplayPrice(car).toLocaleString()}
+                      {getDisplayPrice(car).toLocaleString()} ETB
                     </div>
                     <Badge variant="secondary" className="mt-2">
                       {car.sale_type === "fixed_price"

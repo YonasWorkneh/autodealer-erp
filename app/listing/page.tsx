@@ -323,7 +323,7 @@ export default function page() {
                   {/* Price */}
                   <div className="flex items-center justify-between">
                     <div className="text-2xl font-bold text-primary">
-                      ${getDisplayPrice(car).toLocaleString()}
+                      {getDisplayPrice(car).toLocaleString()} ETB
                     </div>
                     {car.images && car.images.length > 1 && (
                       <span className="text-xs text-muted-foreground">

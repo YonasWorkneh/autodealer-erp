@@ -307,7 +307,7 @@ export default function SalesPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                ${Math.abs(totalSales).toLocaleString()}
+                {Math.abs(totalSales).toLocaleString()} ETB
               </div>
               <p className="text-xs text-muted-foreground">
                 {sales.length} transactions
@@ -528,10 +528,10 @@ export default function SalesPage() {
                           <div className="flex items-center space-x-2">
                             <span className="font-medium">Sale #{sale.id}</span>
                             <span className="text-green-600 font-bold">
-                              $
                               {Math.abs(
                                 parseFloat(sale.price)
-                              ).toLocaleString()}
+                              ).toLocaleString()}{" "}
+                              ETB
                             </span>
                           </div>
                           <p className="text-sm text-muted-foreground">
