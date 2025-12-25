@@ -9,6 +9,7 @@ import {
   TrendingUp,
   UserCheck,
   Briefcase,
+  Calendar,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -36,6 +37,12 @@ export default function Sidebar() {
       roles: ["accountant"],
     },
     { label: "HR", href: "/hr", icon: Briefcase, roles: ["hr"] },
+    {
+      label: "Leaves",
+      href: "/leaves",
+      icon: Calendar,
+      roles: ["hr", "seller", "accountant"],
+    },
     { label: "Staff", href: "/staff", icon: UserCheck, roles: ["dealer"] },
     // { label: "Users", href: "/users", icon: Users },
   ];
@@ -69,9 +76,8 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`w-20 bg-gray-200 flex flex-col items-center py-6 space-y-6 fixed left-0 top-0 h-full z-10 ${
-        isAuthPage && "hidden"
-      }`}
+      className={`w-20 bg-gray-200 flex flex-col items-center py-6 space-y-6 fixed left-0 top-0 h-full z-10 ${isAuthPage && "hidden"
+        }`}
     >
       <Link
         href={"/"}
@@ -90,9 +96,8 @@ export default function Sidebar() {
             <Link
               href={link.href}
               key={link.href}
-              className={`hover:bg-black hover:text-white cursor-pointer size-10 rounded-full grid place-items-center ${
-                active ? " bg-black text-white" : "text-black bg-transparent"
-              }`}
+              className={`hover:bg-black hover:text-white cursor-pointer size-10 rounded-full grid place-items-center ${active ? " bg-black text-white" : "text-black bg-transparent"
+                }`}
             >
               <link.icon className="h-6 w-6" />
             </Link>

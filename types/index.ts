@@ -305,6 +305,7 @@ export interface Leave {
   reason: string;
   status: "pending" | "approved" | "denied";
   approved_by_email: string;
+  rejection_reason?: string;
   created_at: string;
   updated_at: string;
 }
@@ -315,4 +316,5 @@ export interface CreateLeaveRequest {
   end_date: string;
   reason: string;
   status: "pending" | "approved" | "denied";
+  rejection_reason?: string;
 }

@@ -32,6 +32,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Leave, CreateLeaveRequest } from "@/types";
 import { Employee } from "@/types";
+import { toast } from "sonner";
 
 interface LeavesProps {
   leaves: Leave[];
@@ -57,6 +58,7 @@ export function LeavesComponent({
     end_date: "",
     reason: "",
     status: "pending",
+    rejection_reason: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -75,10 +77,11 @@ export function LeavesComponent({
         end_date: "",
         reason: "",
         status: "pending",
+        rejection_reason: "",
       });
     } catch (error) {
       console.error("Error saving leave:", error);
-      alert("Failed to save leave request. Please try again.");
+      toast.error("Failed to save leave request. Please try again.");
     }
   };
 
@@ -90,6 +93,7 @@ export function LeavesComponent({
       end_date: leave.end_date,
       reason: leave.reason,
       status: leave.status,
+      rejection_reason: leave.rejection_reason || "",
     });
     setShowDialog(true);
   };
@@ -100,7 +104,7 @@ export function LeavesComponent({
         await deleteLeave(id);
       } catch (error) {
         console.error("Error deleting leave:", error);
-        alert("Failed to delete leave request. Please try again.");
+        toast.error("Failed to delete leave request. Please try again.");
       }
     }
   };
@@ -228,6 +232,22 @@ export function LeavesComponent({
                     </SelectContent>
                   </Select>
                 </div>
+
+                {form.status === "denied" && (
+                  <div className="grid gap-2">
+                    <Label htmlFor="rejection_reason">Rejection Reason</Label>
+                    <Textarea
+                      id="rejection_reason"
+                      value={form.rejection_reason}
+                      onChange={(e) =>
+                        setForm({ ...form, rejection_reason: e.target.value })
+                      }
+                      rows={3}
+                      placeholder="Enter the reason for rejection..."
+                      required
+                    />
+                  </div>
+                )}
               </div>
               <DialogFooter>
                 <Button
@@ -256,6 +276,7 @@ export function LeavesComponent({
                 <th className="text-left p-2">Reason</th>
                 <th className="text-left p-2">Status</th>
                 <th className="text-left p-2">Approved By</th>
+                <th className="text-left p-2">Details</th>
                 <th className="text-right p-2">Actions</th>
               </tr>
             </thead>
@@ -287,6 +308,13 @@ export function LeavesComponent({
                     </td>
                     <td className="p-2 text-sm text-muted-foreground">
                       {leave.approved_by_email || "N/A"}
+                    </td>
+                    <td className="p-2 text-sm">
+                      {leave.status === "denied" && leave.rejection_reason && (
+                        <div className="text-red-600 text-xs italic">
+                          Reason: {leave.rejection_reason}
+                        </div>
+                      )}
                     </td>
                     <td className="p-2">
                       <DropdownMenu>

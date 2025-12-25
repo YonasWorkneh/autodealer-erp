@@ -19,9 +19,9 @@ export default function RoleRedirect() {
   // Define which paths are accessible for each role
   const roleAccessiblePaths: Record<string, string[]> = {
     dealer: ["/", "/listing", "/staff", "/settings", "/analytics", "/sales"],
-    accountant: ["/accounting", "/settings"],
-    hr: ["/hr", "/settings"],
-    seller: ["/listing", "/sales", "/settings"],
+    accountant: ["/accounting", "/settings", "/leaves"],
+    hr: ["/hr", "/settings", "/leaves"],
+    seller: ["/listing", "/sales", "/settings", "/leaves"],
   };
 
   useEffect(() => {
