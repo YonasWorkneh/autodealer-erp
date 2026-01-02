@@ -13,6 +13,8 @@ export function useCarData() {
   const fetchMakes = useCarStore((state) => state.fetchMakes);
   const fetchModels = useCarStore((state) => state.fetchModels);
   const postCar = useCarStore((state) => state.postCar);
+  const updateCar = useCarStore((state) => state.updateCar);
+  const deleteCar = useCarStore((state) => state.deleteCar);
   const fetchCars = useCarStore((state) => state.fetchCars);
   const fetchFilteredCars = useCarStore((state) => state.fetchFilteredCars);
   const userRole = useUserRole();
@@ -45,6 +47,8 @@ export function useCarData() {
     fetchMakes,
     fetchModels,
     postCar,
+    updateCar,
+    deleteCar,
     fetchCarById: fetchCarByIdWithRole,
     fetchCars: fetchCarsWithRole,
     fetchFilteredCars,

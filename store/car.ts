@@ -28,6 +28,8 @@ interface CarState {
   fetchMakes: () => Promise<void>;
   fetchModels: (makeId?: number) => Promise<void>;
   postCar: (car: FormData) => Promise<void>;
+  updateCar: (id: string, car: FormData) => Promise<void>;
+  deleteCar: (id: string) => Promise<void>;
   fetchFilteredCars: (filters: {
     fuel_type?: string;
     make?: string;
@@ -141,6 +143,36 @@ export const useCarStore = create<CarState>((set) => ({
         body: car,
       });
       set({ isLoading: false });
+    } catch (error) {
+      set({ error: (error as Error).message, isLoading: false });
+      throw error;
+    }
+  },
+
+  updateCar: async (id: string, car: FormData) => {
+    set({ isLoading: true, error: null });
+    try {
+      await api<Car>(`/inventory/cars/${id}/`, {
+        method: "PATCH",
+        body: car,
+      });
+      set({ isLoading: false });
+    } catch (error) {
+      set({ error: (error as Error).message, isLoading: false });
+      throw error;
+    }
+  },
+
+  deleteCar: async (id: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      await api(`/inventory/cars/${id}/`, {
+        method: "DELETE",
+      });
+      set((state) => ({
+        cars: state.cars.filter((c) => c.id.toString() !== id),
+        isLoading: false,
+      }));
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false });
       throw error;
