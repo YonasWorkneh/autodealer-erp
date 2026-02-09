@@ -185,7 +185,7 @@ export default function page() {
                       <XAxis dataKey="month" />
                       <YAxis />
                       <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="sales" fill="black" />
+                      <Bar dataKey="sales" fill="var(--color-primary)" />
                     </BarChart>
                   </ResponsiveContainer>
                 </ChartContainer>
@@ -236,7 +236,7 @@ export default function page() {
                   <CardTitle>Latest Inventory</CardTitle>
                   <Link
                     href={"/listing"}
-                    className="group bg-zinc-800 hover:bg-zinc-900 text-white py-2 text-sm w-fit cursor-pointer flex gap-2 items-center px-3 rounded-full"
+                    className="group bg-primary hover:bg-primary-hover text-primary-foreground py-2 text-sm w-fit cursor-pointer flex gap-2 items-center px-3 rounded-full"
                   >
                     <span>View more</span>
                     <span className="group-hover:translate-x-1 transition-all">
@@ -262,19 +262,19 @@ export default function page() {
                           alt={`${latestCar.year} ${latestCar.make} ${latestCar.model}`}
                           className="w-3/4 max-h-[225px] object-cover rounded-lg"
                         />
-                        <div className="absolute bottom-2 left-2 bg-black rounded-full p-2">
-                          <CarFront className="w-4 h-4 text-white" />
+                        <div className="absolute bottom-2 left-2 bg-primary rounded-full p-2">
+                          <CarFront className="w-4 h-4 text-primary-foreground" />
                         </div>
                       </div>
                       <div className="flex justify-between items-start mb-4">
                         <div>
-                          <p className="text-sm text-black/70">Model</p>
+                          <p className="text-sm text-muted-foreground">Model</p>
                           <h3 className="font-semibold">
                             {latestCar.year} {latestCar.make} {latestCar.model}
                           </h3>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm text-black/70">Price</p>
+                          <p className="text-sm text-muted-foreground">Price</p>
                           <p className="font-semibold">
                             $
                             {parseFloat(
@@ -294,13 +294,13 @@ export default function page() {
                         </Badge>
                         <Badge
                           variant="secondary"
-                          className="bg-black text-white rounded-full capitalize"
+                          className="bg-primary text-primary-foreground rounded-full capitalize"
                         >
                           {latestCar.body_type}
                         </Badge>
                         <Badge
                           variant="secondary"
-                          className="bg-black text-white rounded-full capitalize"
+                          className="bg-primary text-primary-foreground rounded-full capitalize"
                         >
                           {latestCar.fuel_type}
                         </Badge>
@@ -312,7 +312,7 @@ export default function page() {
                         </Badge>
                         <Badge
                           variant="secondary"
-                          className="bg-black text-white rounded-full capitalize"
+                          className="bg-primary text-primary-foreground rounded-full capitalize"
                         >
                           {latestCar.condition}
                         </Badge>
@@ -342,7 +342,7 @@ export default function page() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-black/70 cursor-pointer rounded-full bg-gray-100"
+                      className="text-muted-foreground cursor-pointer rounded-full bg-muted"
                     >
                       Today
                     </Button>
@@ -365,19 +365,19 @@ export default function page() {
 
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3">
-                    <span className="text-sm text-gray-500 w-4">#</span>
-                    <span className="text-sm text-gray-500 flex-1">
+                    <span className="text-sm text-muted-foreground w-4">#</span>
+                    <span className="text-sm text-muted-foreground flex-1">
                       Make/model
                     </span>
-                    <span className="text-sm text-gray-500">Year</span>
-                    <span className="text-sm text-gray-500">Price</span>
+                    <span className="text-sm text-muted-foreground">Year</span>
+                    <span className="text-sm text-muted-foreground">Price</span>
                   </div>
 
                   {topCars.length > 0 ? (
                     topCars.map((car, index) => (
                       <div
                         key={car.id}
-                        className="flex items-center space-x-3 py-2 cursor-pointer hover:bg-gray-50 rounded-lg transition-colors"
+                        className="flex items-center space-x-3 py-2 cursor-pointer hover:bg-muted/50 rounded-lg transition-colors"
                         onClick={() => router.push(`/listing/${car.id}`)}
                       >
                         <span className="text-sm w-4">{index + 1}</span>
@@ -394,14 +394,14 @@ export default function page() {
                         />
                         <div className="flex-1">
                           <div className="text-sm font-medium">{car.make}</div>
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs text-muted-foreground">
                             {car.model}
                           </div>
                         </div>
-                        <span className="text-sm text-gray-500">
+                        <span className="text-sm text-muted-foreground">
                           {car.year}
                         </span>
-                        <span className="text-sm text-gray-500">
+                        <span className="text-sm text-muted-foreground">
                           {parseFloat(
                             typeof car.price === "string"
                               ? car.price
@@ -466,17 +466,17 @@ export default function page() {
 
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3">
-                    <span className="text-sm text-gray-500 w-4">#</span>
-                    <span className="text-sm text-gray-500 flex-1">Email</span>
-                    <span className="text-sm text-gray-500">Sales</span>
-                    <span className="text-sm text-gray-500">Month/Year</span>
+                    <span className="text-sm text-muted-foreground w-4">#</span>
+                    <span className="text-sm text-muted-foreground flex-1">Email</span>
+                    <span className="text-sm text-muted-foreground">Sales</span>
+                    <span className="text-sm text-muted-foreground">Month/Year</span>
                   </div>
 
                   {topSellers.length > 0 ? (
                     topSellers.map((seller, index) => (
                       <div
                         key={`${seller.user_email}-${index}`}
-                        className="flex items-center space-x-3 py-2 hover:bg-gray-50 rounded-lg transition-colors"
+                        className="flex items-center space-x-3 py-2 hover:bg-muted/50 rounded-lg transition-colors"
                       >
                         <span className="text-sm w-4">{index + 1}</span>
                         <div className="flex-1">
@@ -484,10 +484,10 @@ export default function page() {
                             {seller.user_email}
                           </div>
                         </div>
-                        <span className="text-sm text-gray-500">
+                        <span className="text-sm text-muted-foreground">
                           {seller.total_sales}
                         </span>
-                        <span className="text-sm text-gray-500">
+                        <span className="text-sm text-muted-foreground">
                           {seller.month}/{seller.year}
                         </span>
                       </div>
@@ -513,19 +513,19 @@ export default function page() {
 
               <div className="space-y-3">
                 <div className="flex items-center space-x-3">
-                  <span className="text-sm text-gray-500 w-4">#</span>
-                  <span className="text-sm text-gray-500 flex-1">
+                  <span className="text-sm text-muted-foreground w-4">#</span>
+                  <span className="text-sm text-muted-foreground flex-1">
                     Car Details
                   </span>
-                  <span className="text-sm text-gray-500">Sale Count</span>
-                  <span className="text-sm text-gray-500">Month/Year</span>
+                  <span className="text-sm text-muted-foreground">Sale Count</span>
+                  <span className="text-sm text-muted-foreground">Month/Year</span>
                 </div>
 
                 {highSaleCars.length > 0 ? (
                   highSaleCars.map((car, index) => (
                     <div
                       key={`${car.car_details}-${index}`}
-                      className="flex items-center space-x-3 py-2 hover:bg-gray-50 rounded-lg transition-colors"
+                      className="flex items-center space-x-3 py-2 hover:bg-muted/50 rounded-lg transition-colors"
                     >
                       <span className="text-sm w-4">{index + 1}</span>
                       <div className="flex-1">
@@ -533,10 +533,10 @@ export default function page() {
                           {car.car_details}
                         </div>
                       </div>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-muted-foreground">
                         {car.sale_count}
                       </span>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-muted-foreground">
                         {car.month}/{car.year}
                       </span>
                     </div>

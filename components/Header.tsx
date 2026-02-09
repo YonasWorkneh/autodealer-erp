@@ -20,34 +20,34 @@ export default function Header() {
   if (isAuthPage) return null;
   return (
     <div
-      className="flex items-center justify-between mb-6 px-6 fixed top-0 w-[calc(100%-80px)] left-20 bg-white/70  z-50 py-4"
+      className="flex items-center justify-between mb-6 px-6 fixed top-0 w-[calc(100%-80px)] left-20 bg-background/70  z-50 py-4"
       style={{ backdropFilter: "blur(20px)" }}
     >
       <div className="flex items-center space-x-4"></div>
       <div className="flex gap-10 items-center">
         {/* notification */}
         <Link href={"/"} className="relative">
-          <div className="bg-gray-100 size-10 rounded-full grid place-items-center">
+          <div className="bg-muted size-10 rounded-full grid place-items-center">
             <Bell />
           </div>
-          <div className="size-2 bg-black rounded-full absolute top-1 right-1" />
+          <div className="size-2 bg-primary rounded-full absolute top-1 right-1" />
         </Link>
-        <div className="flex items-center space-x-10 bg-gray-100 rounded-full p-4 py-1">
+        <div className="flex items-center space-x-10 bg-muted rounded-full p-4 py-1">
           <div className="flex gap-2 items-center ">
             <p className="text-sm">
               {userRole === "dealer"
                 ? "System Admin"
                 : userRole === "hr"
-                ? "HR"
-                : userRole === "accountant"
-                ? "Accountant"
-                : userRole === "seller"
-                ? "Seller"
-                : ""}
+                  ? "HR"
+                  : userRole === "accountant"
+                    ? "Accountant"
+                    : userRole === "seller"
+                      ? "Seller"
+                      : ""}
             </p>
           </div>
           {userRole !== "dealer" && (
-            <div className="text-gray-500 bg-white rounded-full p-2 text-sm">
+            <div className="text-muted-foreground bg-background rounded-full p-2 text-sm">
               {dealer?.company_name}
             </div>
           )}

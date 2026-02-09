@@ -76,7 +76,7 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`w-20 bg-gray-200 flex flex-col items-center py-6 space-y-6 fixed left-0 top-0 h-full z-10 ${isAuthPage && "hidden"
+      className={`w-20 bg-sidebar flex flex-col items-center py-6 space-y-6 fixed left-0 top-0 h-full border-r border-sidebar-border z-10 ${isAuthPage && "hidden"
         }`}
     >
       <Link
@@ -84,7 +84,7 @@ export default function Sidebar() {
         className="w-8 h-8 rounded-lg flex flex-col items-center justify-center"
       >
         <Image src={"/wheel.png"} alt="logo" width={100} height={100} />
-        <p className="text-xs text-black mt-2 font-bold">AUTO_ERP</p>
+        <p className="text-xs text-sidebar-foreground mt-2 font-bold">AUTO_ERP</p>
       </Link>
       <div className="flex flex-col space-y-10 my-30">
         {links.map((link) => {
@@ -96,7 +96,7 @@ export default function Sidebar() {
             <Link
               href={link.href}
               key={link.href}
-              className={`hover:bg-black hover:text-white cursor-pointer size-10 rounded-full grid place-items-center ${active ? " bg-black text-white" : "text-black bg-transparent"
+              className={`hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer size-10 rounded-full grid place-items-center transition-colors ${active ? " bg-sidebar-primary text-sidebar-primary-foreground" : "text-sidebar-foreground bg-transparent"
                 }`}
             >
               <link.icon className="h-6 w-6" />
@@ -104,16 +104,16 @@ export default function Sidebar() {
           );
         })}
       </div>
-      <div className="flex gap-10 flex-col text-white absolute bottom-10">
+      <div className="flex gap-10 flex-col absolute bottom-10">
         <Link
           href={"/settings"}
-          className="text-black hover:bg-black hover:text-white cursor-pointer size-10 rounded-full grid place-items-center"
+          className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer size-10 rounded-full grid place-items-center transition-colors"
         >
           <Settings className="size-5" />
         </Link>
         <button
           onClick={handleLogout}
-          className="text-black hover:bg-black hover:text-white cursor-pointer size-10 rounded-full grid place-items-center"
+          className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer size-10 rounded-full grid place-items-center transition-colors"
         >
           <LogOut className="size-5" />
         </button>
