@@ -8,6 +8,7 @@ import Header from "@/components/Header";
 import RoleRedirect from "@/components/RoleRedirect";
 import { cookies } from "next/headers";
 import Protected from "./Protected";
+import Providers from "./Providers";
 
 export const metadata: Metadata = {
   title: "E-Car-ERP",
@@ -38,7 +39,7 @@ html {
       <body>
         <div className="root">
           <Protected isLogged={isLogged}>
-            <>
+            <Providers>
               <RoleRedirect />
               {/* sidebar */}
               <Sidebar />
@@ -46,7 +47,7 @@ html {
                 <Header />
                 <div className="root">{children}</div>
               </main>
-            </>
+            </Providers>
           </Protected>
         </div>
       </body>

@@ -76,15 +76,15 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`w-20 bg-sidebar flex flex-col items-center py-6 space-y-6 fixed left-0 top-0 h-full border-r border-sidebar-border z-10 ${isAuthPage && "hidden"
+      className={`w-20 bg-primary flex flex-col items-center py-6 space-y-6 fixed left-0 top-0 h-full border-r border-primary-hover/20 z-10 ${isAuthPage && "hidden"
         }`}
     >
       <Link
         href={"/"}
         className="w-8 h-8 rounded-lg flex flex-col items-center justify-center"
       >
-        <Image src={"/wheel.png"} alt="logo" width={100} height={100} />
-        <p className="text-xs text-sidebar-foreground mt-2 font-bold">AUTO_ERP</p>
+        <Image src={"/wheel.png"} alt="logo" width={100} height={100} className="invert brightness-0" />
+        <p className="text-[10px] text-primary-foreground mt-2 font-bold tracking-tighter">AUTO_ERP</p>
       </Link>
       <div className="flex flex-col space-y-10 my-30">
         {links.map((link) => {
@@ -96,7 +96,7 @@ export default function Sidebar() {
             <Link
               href={link.href}
               key={link.href}
-              className={`hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer size-10 rounded-full grid place-items-center transition-colors ${active ? " bg-sidebar-primary text-sidebar-primary-foreground" : "text-sidebar-foreground bg-transparent"
+              className={`hover:bg-primary-hover hover:text-white cursor-pointer size-10 rounded-full grid place-items-center transition-colors ${active ? " bg-white text-primary shadow-md" : "text-primary-foreground bg-transparent"
                 }`}
             >
               <link.icon className="h-6 w-6" />
@@ -107,13 +107,13 @@ export default function Sidebar() {
       <div className="flex gap-10 flex-col absolute bottom-10">
         <Link
           href={"/settings"}
-          className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer size-10 rounded-full grid place-items-center transition-colors"
+          className="text-primary-foreground hover:bg-primary-hover hover:text-white cursor-pointer size-10 rounded-full grid place-items-center transition-colors"
         >
           <Settings className="size-5" />
         </Link>
         <button
           onClick={handleLogout}
-          className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer size-10 rounded-full grid place-items-center transition-colors"
+          className="text-primary-foreground hover:bg-primary-hover hover:text-white cursor-pointer size-10 rounded-full grid place-items-center transition-colors"
         >
           <LogOut className="size-5" />
         </button>

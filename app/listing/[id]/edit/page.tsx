@@ -309,6 +309,7 @@ export default function EditCarScreen() {
                 location: car.location || "",
                 auction_end: car.auction_end || "",
                 status: car.status as any,
+                condition: (car.condition === "new" || car.condition === "used") ? car.condition : "used",
                 make: car.make,
                 model: car.model,
                 make_ref: car.make_ref,
@@ -433,7 +434,8 @@ export default function EditCarScreen() {
 
             const booleanFeatures = Object.values(featureCategories).flat();
             booleanFeatures.forEach((feature) => {
-                carData.append(feature, formData[feature as keyof CarFormData].toString());
+                const value = formData[feature as keyof CarFormData];
+                carData.append(feature, (value ?? false).toString());
             });
 
             formData.uploaded_images.forEach((image, index) => {

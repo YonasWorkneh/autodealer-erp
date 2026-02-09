@@ -1,358 +1,345 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Camera, Info, User } from "lucide-react";
-import { useProfile } from "@/hooks/useProfile";
-import { useUserRole } from "@/hooks/useUserRole";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Camera, Info, User, Eye, EyeOff, Loader2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useUserStore } from "@/store/user";
+import { updateProfile } from "@/lib/profileApi";
+import { changePassword } from "@/lib/auth/changePassword";
+import { useToast } from "@/components/ui/use-toast";
+import { useProfileDetail } from "@/hooks/useProfileDetail";
 
 export default function AccountSettingsPage() {
-  const { dealer, isLoading, error, getDealer, updateDealer } = useProfile();
-  const userRole = useUserRole();
-  const { user } = useUserStore();
+  const { user, setUser } = useUserStore();
+  const { toast } = useToast();
+  const { profile, isLoadingProfile, refetchProfile } = useProfileDetail();
+  console.log("profile", profile);
 
-  const [formData, setFormData] = useState({
-    company_name: "",
-    license_number: "",
-    tax_id: "",
-    telebirr_account: "",
+  const [profileForm, setProfileForm] = useState({
     first_name: "",
     last_name: "",
     email: "",
     contact: "",
     address: "",
+    profile_image: null as File | null,
+  });
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+  const [passwordForm, setPasswordForm] = useState({
+    newPassword: "",
+    confirmPassword: "",
+  });
+
+  const [showPassword, setShowPassword] = useState({
+    new: false,
+    confirm: false,
+  });
+
+  const [loading, setLoading] = useState({
+    profile: false,
+    password: false,
   });
 
   useEffect(() => {
-    if (userRole === "dealer") {
-      getDealer();
-    }
-  }, [userRole, getDealer]);
-
-  useEffect(() => {
-    if (dealer && userRole === "dealer") {
-      setFormData({
-        company_name: dealer.company_name || "",
-        license_number: dealer.license_number || "",
-        tax_id: dealer.tax_id || "",
-        telebirr_account: dealer.telebirr_account || "",
-        first_name: dealer.profile?.first_name || "",
-        last_name: dealer.profile?.last_name || "",
-        email: user.email || "",
-        contact: dealer.profile?.contact || "",
-        address: dealer.profile?.address || "",
-      });
-    } else if (userRole !== "dealer") {
-      setFormData({
-        company_name: "",
-        license_number: "",
-        tax_id: "",
-        telebirr_account: "",
-        first_name: user.first_name || "",
-        last_name: user.last_name || "",
-        email: user.email || "",
-        contact: "",
-        address: "",
+    if (profile) {
+      setProfileForm({
+        first_name: profile.first_name || "",
+        last_name: profile.last_name || "",
+        email: profile.email || "",
+        contact: profile.contact || "",
+        address: profile.address || "",
+        // Don't set profile_image initially as it's for file upload
+        profile_image: null,
       });
     }
-  }, [dealer, user, userRole]);
+  }, [profile]);
 
-  const isSaveDisabled = useMemo(() => {
-    if (userRole === "dealer") {
-      if (!dealer) return true;
-      return (
-        formData.company_name === (dealer.company_name || "") &&
-        formData.license_number === (dealer.license_number || "") &&
-        formData.tax_id === (dealer.tax_id || "") &&
-        formData.telebirr_account === (dealer.telebirr_account || "")
-      );
-    } else {
-      // For non-dealer roles, check if user info changed
-      return (
-        formData.first_name === (user.first_name || "") &&
-        formData.last_name === (user.last_name || "") &&
-        formData.email === (user.email || "")
-      );
-    }
-  }, [dealer, formData, user, userRole]);
+  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setProfileForm({ ...profileForm, [e.target.id]: e.target.value });
+  };
 
-  const handleSave = async () => {
-    if (userRole === "dealer") {
-      if (!dealer) return;
-      const payload: any = {};
-      if (formData.company_name !== dealer.company_name)
-        payload.company_name = formData.company_name;
-      if (formData.license_number !== dealer.license_number)
-        payload.license_number = formData.license_number;
-      if (formData.tax_id !== dealer.tax_id) payload.tax_id = formData.tax_id;
-      if (formData.telebirr_account !== dealer.telebirr_account)
-        payload.telebirr_account = formData.telebirr_account;
-      if (Object.keys(payload).length === 0) return;
-
-      await updateDealer(payload);
-    } else {
-      // For other roles, update user profile (if API exists)
-      // For now, just show a message
-      alert("User profile update functionality coming soon!");
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setProfileForm({ ...profileForm, profile_image: file });
+      setPreviewImage(URL.createObjectURL(file));
     }
   };
 
-  const getRoleTitle = () => {
-    switch (userRole) {
-      case "dealer":
-        return "Dealer Profile";
-      case "hr":
-        return "HR Profile";
-      case "accountant":
-        return "Accountant Profile";
-      case "seller":
-        return "Sales Profile";
-      default:
-        return "Account Settings";
+  const handleProfileUpdate = async () => {
+    if (!profile) return;
+
+    setLoading((prev) => ({ ...prev, profile: true }));
+    try {
+      const formData = new FormData();
+      formData.append("first_name", profileForm.first_name);
+      formData.append("last_name", profileForm.last_name);
+      formData.append("email", profileForm.email);
+      formData.append("contact", profileForm.contact);
+      formData.append("addresse", profileForm.address);
+      if (profileForm.profile_image) {
+        formData.append("image", profileForm.profile_image);
+      }
+
+      const updatedUser = await updateProfile({
+        id: profile.id,
+        profile: formData,
+      });
+
+      toast({
+        title: "Success",
+        description: "Profile updated successfully.",
+        variant: "success"
+      });
+
+      // Update local store and refetch profile to ensure consistency
+      setUser(updatedUser);
+      refetchProfile();
+
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update profile.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading((prev) => ({ ...prev, profile: false }));
     }
   };
 
-  const getRoleDescription = () => {
-    switch (userRole) {
-      case "dealer":
-        return "Update your dealer profile and company information.";
-      case "hr":
-        return "Manage your HR account settings.";
-      case "accountant":
-        return "Manage your accountant account settings.";
-      case "seller":
-        return "Manage your sales account settings.";
-      default:
-        return "Update your account settings.";
+  const handlePasswordChange = async () => {
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Passwords do not match.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 8) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 8 characters long.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading((prev) => ({ ...prev, password: true }));
+    try {
+      await changePassword({
+        new_password: passwordForm.newPassword,
+        confirm_password: passwordForm.confirmPassword,
+      });
+      toast({
+        title: "Success",
+        variant: "success",
+        description: "Password changed successfully.",
+      });
+      setPasswordForm({ newPassword: "", confirmPassword: "" });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to change password. Please check your current password requirements.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading((prev) => ({ ...prev, password: false }));
     }
   };
+
+  if (isLoadingProfile) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
       <div className="max-w-4xl">
+        {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-black mb-2">
+          <h1 className="text-3xl font-bold text-primary mb-2">
             Account Settings
           </h1>
-          <p className="text-gray-600">{getRoleDescription()}</p>
-          {isLoading && (
-            <p className="text-gray-500 text-sm mt-1">Loading profile...</p>
-          )}
+          <p className="text-muted-foreground">
+            Edit your personal information and manage account security.
+          </p>
         </div>
 
-        <Card className="border border-gray-200">
+        <Card className="border border-gray-200 shadow-none bg-transparent">
           <CardContent className="p-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Form Fields */}
               <div className="lg:col-span-2 space-y-6">
-                {userRole === "dealer" ? (
-                  <>
+                {/* Name */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="first_name">First Name</Label>
+                    <Input
+                      id="first_name"
+                      value={profileForm.first_name}
+                      onChange={handleProfileChange}
+                      className="py-6"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="last_name">Last Name</Label>
+                    <Input
+                      id="last_name"
+                      value={profileForm.last_name}
+                      onChange={handleProfileChange}
+                      className="py-6"
+                    />
+                  </div>
+                </div>
+
+                {/* Contact and Address */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="contact">Phone Number</Label>
+                    <Input
+                      id="contact"
+                      value={profileForm.contact}
+                      onChange={handleProfileChange}
+                      className="py-6"
+                      placeholder="+251..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="address">Address</Label>
+                    <Input
+                      id="address"
+                      value={profileForm.address}
+                      onChange={handleProfileChange}
+                      className="py-6"
+                      placeholder="Addis Ababa, ..."
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end mt-4">
+                  <Button
+                    onClick={handleProfileUpdate}
+                    disabled={loading.profile}
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                  >
+                    {loading.profile && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Save Profile
+                  </Button>
+                </div>
+
+                <div className="border-t border-gray-200 my-8 pt-8">
+                  <h3 className="text-lg font-semibold mb-4">Change Password</h3>
+
+                  {/* Password */}
+                  <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label
-                        htmlFor="company_name"
-                        className="text-sm font-medium text-black"
-                      >
-                        Company Name
-                      </Label>
-                      <Input
-                        id="company_name"
-                        value={formData.company_name}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            company_name: e.target.value,
-                          })
-                        }
-                        disabled={isLoading}
-                        className="border-gray-200 focus:border-black focus:ring-black py-8"
-                      />
+                      <Label htmlFor="newPassword">New Password</Label>
+                      <div className="relative">
+                        <Input
+                          id="newPassword"
+                          type={showPassword.new ? "text" : "password"}
+                          value={passwordForm.newPassword}
+                          onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                          className="py-6 pr-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword({ ...showPassword, new: !showPassword.new })}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        >
+                          {showPassword.new ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                      </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label
-                        htmlFor="license_number"
-                        className="text-sm font-medium text-black"
-                      >
-                        License Number
-                      </Label>
-                      <Input
-                        id="license_number"
-                        value={formData.license_number}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            license_number: e.target.value,
-                          })
-                        }
-                        disabled={isLoading}
-                        className="border-gray-200 focus:border-black focus:ring-black py-8"
-                      />
+                      <Label htmlFor="confirmPassword">Confirm Password</Label>
+                      <div className="relative">
+                        <Input
+                          id="confirmPassword"
+                          type={showPassword.confirm ? "text" : "password"}
+                          value={passwordForm.confirmPassword}
+                          onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                          className="py-6 pr-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword({ ...showPassword, confirm: !showPassword.confirm })}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        >
+                          {showPassword.confirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                      </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="tax_id"
-                        className="text-sm font-medium text-black"
+                    <div className="flex justify-end mt-4">
+                      <Button
+                        onClick={handlePasswordChange}
+                        disabled={loading.password || !passwordForm.newPassword || !passwordForm.confirmPassword}
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground"
                       >
-                        Tax ID
-                      </Label>
-                      <Input
-                        id="tax_id"
-                        value={formData.tax_id}
-                        onChange={(e) =>
-                          setFormData({ ...formData, tax_id: e.target.value })
-                        }
-                        disabled={isLoading}
-                        className="border-gray-200 focus:border-black focus:ring-black py-8"
-                      />
+                        {loading.password && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Change Password
+                      </Button>
                     </div>
-
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="telebirr_account"
-                        className="text-sm font-medium text-black"
-                      >
-                        Telebirr Account
-                      </Label>
-                      <Input
-                        id="telebirr_account"
-                        value={formData.telebirr_account}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            telebirr_account: e.target.value,
-                          })
-                        }
-                        disabled={isLoading}
-                        className="border-gray-200 focus:border-black focus:ring-black py-8"
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="first_name"
-                        className="text-sm font-medium text-black"
-                      >
-                        First Name
-                      </Label>
-                      <Input
-                        id="first_name"
-                        value={formData.first_name}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            first_name: e.target.value,
-                          })
-                        }
-                        disabled={isLoading}
-                        className="border-gray-200 focus:border-black focus:ring-black py-8"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="last_name"
-                        className="text-sm font-medium text-black"
-                      >
-                        Last Name
-                      </Label>
-                      <Input
-                        id="last_name"
-                        value={formData.last_name}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            last_name: e.target.value,
-                          })
-                        }
-                        disabled={isLoading}
-                        className="border-gray-200 focus:border-black focus:ring-black py-8"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="email"
-                        className="text-sm font-medium text-black"
-                      >
-                        Email
-                      </Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) =>
-                          setFormData({ ...formData, email: e.target.value })
-                        }
-                        disabled={true}
-                        className="border-gray-200 focus:border-black focus:ring-black py-8 bg-gray-50"
-                      />
-                      <p className="text-xs text-gray-500">
-                        Email cannot be changed
-                      </p>
-                    </div>
-                  </>
-                )}
+                  </div>
+                </div>
               </div>
-            </div>
 
-            {/* Save helper text */}
-            {error ? (
-              <div className="mt-12 pt-8 border-t border-red-200">
-                <div className="text-red-600 text-sm">{error}</div>
+              {/* Avatar */}
+              <div className="flex flex-col items-center space-y-4 relative h-fit">
+                <Avatar className="w-24 h-24">
+                  <AvatarImage
+                    src={previewImage || profile?.image || "/placeholder-avatar.png"}
+                    alt="User avatar"
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="bg-primary/10 text-primary text-xl font-semibold">
+                    {profile?.first_name?.charAt(0)}
+                    {profile?.last_name?.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+
+                {/* Upload button */}
+                <label
+                  htmlFor="avatar-upload"
+                  className="cursor-pointer absolute bottom-0 left-[calc(50%-18px)] bg-primary hover:bg-primary/90 text-primary-foreground p-2 rounded-full shadow-lg transition-transform hover:scale-105"
+                >
+                  <Camera className="h-4 w-4" />
+                </label>
+                <input
+                  id="avatar-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <p className="text-xs text-muted-foreground mt-2">
+                  Click camera icon to change
+                </p>
               </div>
-            ) : null}
-
-            {/* Action Buttons */}
-            <div className="flex gap-4 justify-end">
-              <Button
-                variant="outline"
-                className="px-8 border-gray-300 text-gray-700 hover:bg-gray-50 bg-transparent"
-                onClick={() => {
-                  if (userRole === "dealer" && dealer) {
-                    setFormData({
-                      company_name: dealer.company_name || "",
-                      license_number: dealer.license_number || "",
-                      tax_id: dealer.tax_id || "",
-                      telebirr_account: dealer.telebirr_account || "",
-                      first_name: dealer.profile?.first_name || "",
-                      last_name: dealer.profile?.last_name || "",
-                      email: user.email || "",
-                      contact: dealer.profile?.contact || "",
-                      address: dealer.profile?.address || "",
-                    });
-                  } else {
-                    setFormData({
-                      company_name: "",
-                      license_number: "",
-                      tax_id: "",
-                      telebirr_account: "",
-                      first_name: user.first_name || "",
-                      last_name: user.last_name || "",
-                      email: user.email || "",
-                      contact: "",
-                      address: "",
-                    });
-                  }
-                }}
-                disabled={isLoading}
-              >
-                Cancel
-              </Button>
-              <Button
-                className="bg-black hover:bg-gray-800 text-white px-8"
-                onClick={handleSave}
-                disabled={isSaveDisabled || isLoading}
-              >
-                {isLoading ? "Saving..." : "Save"}
-              </Button>
             </div>
           </CardContent>
         </Card>
