@@ -32,14 +32,6 @@ export default function PayslipPage() {
     );
   }
 
-  if (payslipError) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-red-500">Error loading payslip data</p>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-background">
       <div className="p-6">
@@ -52,6 +44,24 @@ export default function PayslipPage() {
             View your payroll payslip information and earnings details
           </p>
         </div>
+
+        {/* Error Display */}
+        {payslipError && (
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-xs font-bold">!</span>
+              </div>
+              <div>
+                <h3 className="text-red-800 font-medium">Error Loading Data</h3>
+                <p className="text-red-600 text-sm">
+                  Failed to fetch payslip data. Please check your connection and
+                  try again.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Refresh Button */}
         <div className="mb-6">
@@ -67,7 +77,7 @@ export default function PayslipPage() {
 
         {/* Payslip Data */}
         {payslipData?.length === 0 ? (
-          <Card>
+          <Card className="shadow-none bg-transparent">
             <CardContent className="text-center py-8">
               <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-lg font-medium mb-2">No Payslip Data</h3>
@@ -79,7 +89,7 @@ export default function PayslipPage() {
         ) : (
           <div className="space-y-6">
             {payslipData?.map((payslip: PayslipItem, index: number) => (
-              <Card key={index}>
+              <Card key={index} className="shadow-none bg-transparent">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">

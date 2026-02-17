@@ -40,7 +40,6 @@ html {
         <div className="root">
           <Protected isLogged={isLogged}>
             <Providers>
-              <RoleRedirect />
               {/* sidebar */}
               <Sidebar />
               <main className="flex-1 ml-16 overflow-y-auto max-h-screen p-4 py-0 bg-background pt-20">

@@ -143,7 +143,7 @@ export const getPayslip = async () => {
   try {
     const credential = await getCredentials();
     const { access } = credential;
-    const response = await fetch(`${API_URL}/payroll/payslip`, {
+    const response = await fetch(`${API_URL}/payroll/payslips`, {
       headers: {
         Authorization: `Bearer ${access}`,
       },
