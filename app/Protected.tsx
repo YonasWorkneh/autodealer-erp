@@ -40,30 +40,24 @@ export default function Protected({
     // Only run auth refresh for logged-in users on non-auth pages
     const refreshUserCredentials = async () => {
       try {
-        console.log("Fetching user credentials from /api/me...");
         const res = await fetch("/api/me");
-        console.log("Response status:", res.status);
+    
         const data = await res.json();
-        console.log("Response data:", data);
 
         if (!data.ok) {
-          console.error("Token refresh failed:", data.message);
           clearAuthState();
           router.push("/signin");
           return;
         }
         if (!data.user) {
-          console.error("No user data in response");
           clearAuthState();
           router.push("/signin");
           return;
         }
-        console.log("User data loaded successfully:", data.user);
         setUser(data.user);
         initializeAuthState(data.user);
         setIsMounted(true);
       } catch (err: any) {
-        console.error("Error in refreshUserCredentials:", err.message);
         clearAuthState();
         router.push("/signin");
       }

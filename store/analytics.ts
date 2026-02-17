@@ -128,7 +128,7 @@ export const useAnalyticsStore = create<AnalyticsState>((set) => ({
         `/analytics/top-sellers/?${params.toString()}`,
         { method: "GET" }
       );
-      console.log("Top sellers response:", res);
+      // console.log("Top sellers response:", res);
       set((state) => ({
         topSellers: res,
         isLoading: false,

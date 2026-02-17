@@ -7,8 +7,6 @@ export const createSalaryComponent = async (
 ) => {
   const credential = await getCredentials();
   const { access } = credential;
-  console.log("name", name);
-  console.log("component_type", component_type);
   try {
     const response = await fetch(`${API_URL}/hr/salary-components`, {
       method: "POST",
@@ -139,4 +137,22 @@ export const runPayroll = async (id: number) => {
     },
   });
   return response.json();
+};
+
+export const getPayslip = async () => {
+  try {
+    const credential = await getCredentials();
+    const { access } = credential;
+    const response = await fetch(`${API_URL}/payroll/payslip`, {
+      headers: {
+        Authorization: `Bearer ${access}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Failed to fetch payslip");
+    }
+    return response.json();
+  } catch (error) {
+    throw error;
+  }
 };

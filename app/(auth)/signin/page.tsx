@@ -36,6 +36,13 @@ export default function SignIn() {
   const router = useRouter();
   const queryClient = useQueryClient();
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSubmit(onSubmit)(e);
+    }
+  };
+
   const onSubmit = async (data: any) => {
     try {
       setLoading(true);
@@ -72,7 +79,7 @@ export default function SignIn() {
                 method: "GET",
               });
               const currentUserStaff = staff.find(
-                (s) => s.user.email === user.user.email
+                (s) => s.user.email === user.user.email,
               );
               if (currentUserStaff) {
                 if (currentUserStaff.role === "accountant") {
@@ -85,12 +92,11 @@ export default function SignIn() {
           }
         }
       } catch (roleError) {
-        console.log("Error determining role, using default:", roleError);
       }
 
       // Invalidate and refetch profile query after successful login
       await queryClient.invalidateQueries({ queryKey: ["profile"] });
-      
+
       const defaultRoute = getDefaultRoute(userRole);
       router.push(defaultRoute);
     } catch (err: any) {
@@ -124,7 +130,11 @@ export default function SignIn() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          onKeyDown={handleKeyDown}
+          className="grid gap-4"
+        >
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -190,7 +200,7 @@ export default function SignIn() {
           <div
             className={cn(
               "w-full gap-2 flex items-center",
-              "justify-between flex-col"
+              "justify-between flex-col",
             )}
           ></div>
         </form>

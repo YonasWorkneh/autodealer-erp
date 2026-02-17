@@ -164,7 +164,6 @@ export async function api<T>(path: string, opts: Options = {}): Promise<T> {
 
   // Only attempt token refresh if we have auth state and it's not already refreshing
   if (!skipAuth && shouldRefreshTokens() && !isRefreshing) {
-    console.log("Token refresh needed, refreshing proactively...");
     isRefreshing = true;
     refreshPromise = refreshTokens();
 
@@ -198,11 +197,8 @@ export async function api<T>(path: string, opts: Options = {}): Promise<T> {
   });
 
   if (res.status === 401 && !skipAuth) {
-    console.log("Got 401, attempting token refresh...");
-
     // Prevent infinite refresh loops
     if (isRefreshing) {
-      console.log("Already refreshing, redirecting to login...");
       if (typeof window !== "undefined") {
         clearAuthState();
         window.location.href = "/signin";

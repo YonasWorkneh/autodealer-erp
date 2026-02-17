@@ -66,8 +66,6 @@ export default function page() {
     return Number.isNaN(priceValue) ? 0 : priceValue;
   };
 
-  console.log("cars ", cars);
-
   useEffect(() => {
     fetchCars();
   }, [fetchCars]);

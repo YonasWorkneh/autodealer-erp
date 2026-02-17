@@ -12,12 +12,10 @@ export const getNotifications = async () => {
         Authorization: `Bearer ${access}`,
       },
     });
-    console.log("notification response", res);
     if (!res.ok) throw new Error("Something went wrong");
     const notifications: NotificationResponse = await res.json();
     return notifications;
   } catch (err: any) {
-    console.log("notification error", err);
     throw err;
   }
 };

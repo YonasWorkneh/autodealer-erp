@@ -57,7 +57,6 @@ export function SalaryComponent() {
     salaryCptErr,
   } = useSalaryCpts();
 
-  console.log("salaryCptErr", salaryCptErr);
 
   const safeSalaryCpts = salaryCpts || [];
 

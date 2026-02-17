@@ -48,13 +48,13 @@ export const signin = async (data: SignInParams) => {
 
 export const getUser = async (id: number) => {
   try {
-    console.log(process.env.BASE_API_URL);
+    // console.log(process.env.BASE_API_URL);
     const res = await fetch(
       `${process.env.BASE_API_URL}/users/user-profiles/${id}`,
     );
     if (!res.ok) throw new Error("Something went wrong");
     const user = await res.json();
-    console.log(user);
+    // console.log(user);
     return user;
   } catch (err: any) {
     console.error(err.message);

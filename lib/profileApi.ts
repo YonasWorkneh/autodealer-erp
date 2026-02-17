@@ -63,7 +63,6 @@ export const updateProfile = async (data: any) => {
       method: "PATCH",
       body: profile,
     });
-    console.log("profile update", res);
 
     if (!res.ok) {
       const errorData = await res.json().catch(() => null);
@@ -79,7 +78,6 @@ export const updateProfile = async (data: any) => {
     }
 
     const updatedProfile = await res.json();
-    console.log("updatedProfile", updatedProfile);
     return updatedProfile;
   } catch (err: any) {
     console.error("profile update", err.message);

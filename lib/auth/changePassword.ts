@@ -22,7 +22,6 @@ export const changePassword = async (data: ChangePasswordParams) => {
         new_password2: data.confirm_password,
       }),
     });
-    console.log("change password response", res); 
 
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
@@ -32,7 +31,6 @@ export const changePassword = async (data: ChangePasswordParams) => {
         errData?.non_field_errors?.[0] ||
         errData?.detail ||
         "Failed to change password. Please check your credentials.";
-        console.log("change password error", message); 
       throw new Error(message);
     }
 

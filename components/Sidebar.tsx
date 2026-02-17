@@ -12,6 +12,7 @@ import {
   Calendar,
   Receipt,
   DollarSign,
+  FileText,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -51,6 +52,12 @@ export default function Sidebar() {
       href: "/finance",
       icon: DollarSign,
       roles: ["finance"],
+    },
+    {
+      label: "Payslip",
+      href: "/payslip",
+      icon: FileText,
+      roles: ["seller", "accountant", "hr", "finance"],
     },
     {
       label: "Leaves",

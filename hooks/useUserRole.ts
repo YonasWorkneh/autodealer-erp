@@ -14,15 +14,11 @@ export function useUserRole() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    console.log("useEffect triggered, user.email:", user.email);
     const fetchRole = async () => {
       try {
         setIsLoading(true);
         const credential = await getCredentials();
-        console.log("Credential:", credential);
-
         if (!credential?.access) {
-          console.log("No access token found");
           setRole("dealer");
           return;
         }
@@ -33,21 +29,15 @@ export function useUserRole() {
           },
         });
 
-        console.log("Response status:", res.status);
-
         if (res.ok) {
           const staff = await res.json();
-          console.log("Staff:", staff);
           setRole(staff.role || "dealer");
         } else {
-          console.log("Response not ok, defaulting to dealer");
           setRole("dealer");
         }
       } catch (error) {
-        console.error("Failed to fetch user role:", error);
         setRole("dealer");
       } finally {
-        console.log("isLoading finished, setting to false");
         setIsLoading(false);
       }
     };

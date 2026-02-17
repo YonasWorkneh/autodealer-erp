@@ -46,7 +46,6 @@ export default function HRPage() {
 
   const { isLoading: isUserRoleLoading } = useUserRole();
 
-  console.log("isUserRoleLoading:", isUserRoleLoading);
 
   // Only show loading screen on initial load (when no data exists yet)
   const isInitialLoad =
