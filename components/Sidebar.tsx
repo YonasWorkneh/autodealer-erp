@@ -10,6 +10,7 @@ import {
   UserCheck,
   Briefcase,
   Calendar,
+  Receipt,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -19,6 +20,7 @@ import { clearAuthState } from "@/lib/api";
 import { useUserStore } from "@/store/user";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Sidebar() {
   const allLinks = [
@@ -36,6 +38,12 @@ export default function Sidebar() {
       icon: Calculator,
       roles: ["accountant"],
     },
+    {
+      label: "Payroll",
+      href: "/payroll",
+      icon: Receipt,
+      roles: ["accountant"],
+    },
     { label: "HR", href: "/hr", icon: Briefcase, roles: ["hr"] },
     {
       label: "Leaves",
@@ -50,41 +58,55 @@ export default function Sidebar() {
   const pathName = usePathname();
   const router = useRouter();
   const { clearUser } = useUserStore();
-  const userRole = useUserRole();
-  const { dealer } = useProfile();
+  const { role: userRole, isLoading } = useUserRole();
+  const queryClient = useQueryClient();
   const isAuthPage = pathName.includes("signin") || pathName.includes("signup");
 
   const links = useMemo(() => {
     return allLinks.filter((link) => link.roles.includes(userRole));
-  }, [userRole]);
+  }, [userRole, allLinks]);
 
   const handleLogout = async () => {
     try {
       await fetch("/api/logout", { method: "POST" });
+      // Remove profile query from cache on logout
+      queryClient.removeQueries({ queryKey: ["profile"] });
       clearAuthState();
       clearUser();
       router.push("/signin");
     } catch (error) {
       console.error("Logout failed:", error);
+      // Remove profile query from cache even if logout API fails
+      queryClient.removeQueries({ queryKey: ["profile"] });
       clearAuthState();
       clearUser();
       router.push("/signin");
     }
   };
 
-  if (isAuthPage) return null;
+  if (isAuthPage || isLoading) return null;
 
   return (
     <aside
-      className={`w-20 bg-primary flex flex-col items-center py-6 space-y-6 fixed left-0 top-0 h-full border-r border-primary-hover/20 z-10 ${isAuthPage && "hidden"
-        }`}
+      key={`sidebar-${userRole}`}
+      className={`w-20 bg-primary flex flex-col items-center py-6 space-y-6 fixed left-0 top-0 h-full border-r border-primary-hover/20 z-10 ${
+        isAuthPage && "hidden"
+      }`}
     >
       <Link
         href={"/"}
         className="w-8 h-8 rounded-lg flex flex-col items-center justify-center"
       >
-        <Image src={"/wheel.png"} alt="logo" width={100} height={100} className="invert brightness-0" />
-        <p className="text-[10px] text-primary-foreground mt-2 font-bold tracking-tighter">AUTO_ERP</p>
+        <Image
+          src={"/wheel.png"}
+          alt="logo"
+          width={100}
+          height={100}
+          className="invert brightness-0"
+        />
+        <p className="text-[10px] text-primary-foreground mt-2 font-bold tracking-tighter">
+          AUTO_ERP
+        </p>
       </Link>
       <div className="flex flex-col space-y-10 my-30">
         {links.map((link) => {
@@ -96,8 +118,11 @@ export default function Sidebar() {
             <Link
               href={link.href}
               key={link.href}
-              className={`hover:bg-primary-hover hover:text-white cursor-pointer size-10 rounded-full grid place-items-center transition-colors ${active ? " bg-white text-primary shadow-md" : "text-primary-foreground bg-transparent"
-                }`}
+              className={`hover:bg-primary-hover hover:text-white cursor-pointer size-10 rounded-full grid place-items-center transition-colors ${
+                active
+                  ? " bg-white text-primary shadow-md"
+                  : "text-primary-foreground bg-transparent"
+              }`}
             >
               <link.icon className="h-6 w-6" />
             </Link>

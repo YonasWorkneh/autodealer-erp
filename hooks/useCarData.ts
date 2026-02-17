@@ -17,7 +17,7 @@ export function useCarData() {
   const deleteCar = useCarStore((state) => state.deleteCar);
   const fetchCars = useCarStore((state) => state.fetchCars);
   const fetchFilteredCars = useCarStore((state) => state.fetchFilteredCars);
-  const userRole = useUserRole();
+  const { role: userRole } = useUserRole();
 
   useEffect(() => {
     if (makes.length === 0) {
@@ -34,7 +34,7 @@ export function useCarData() {
     (id: string) => {
       return fetchCarById(id, userRole);
     },
-    [fetchCarById, userRole]
+    [fetchCarById, userRole],
   );
 
   return {

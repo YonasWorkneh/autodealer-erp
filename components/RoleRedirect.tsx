@@ -12,14 +12,14 @@ import { getDefaultRoute } from "@/lib/getDefaultRoute";
 export default function RoleRedirect() {
   const router = useRouter();
   const pathname = usePathname();
-  const userRole = useUserRole();
+  const { role: userRole } = useUserRole();
   const previousRoleRef = useRef<string | null>(null);
   const isInitialMountRef = useRef(true);
 
   // Define which paths are accessible for each role
   const roleAccessiblePaths: Record<string, string[]> = {
     dealer: ["/", "/listing", "/staff", "/settings", "/analytics", "/sales"],
-    accountant: ["/accounting", "/settings", "/leaves"],
+    accountant: ["/accounting", "/payroll", "/settings", "/leaves"],
     hr: ["/hr", "/settings", "/leaves"],
     seller: ["/listing", "/sales", "/settings", "/leaves"],
   };

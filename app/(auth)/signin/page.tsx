@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import { initializeAuthState, api } from "@/lib/api";
 import { getDefaultRoute } from "@/lib/getDefaultRoute";
 import { UserRole } from "@/hooks/useUserRole";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -33,6 +34,7 @@ export default function SignIn() {
   const [err, setErr] = useState("");
   const { setUser } = useUserStore();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const onSubmit = async (data: any) => {
     try {
@@ -86,6 +88,9 @@ export default function SignIn() {
         console.log("Error determining role, using default:", roleError);
       }
 
+      // Invalidate and refetch profile query after successful login
+      await queryClient.invalidateQueries({ queryKey: ["profile"] });
+      
       const defaultRoute = getDefaultRoute(userRole);
       router.push(defaultRoute);
     } catch (err: any) {
@@ -111,7 +116,7 @@ export default function SignIn() {
               className="w-full h-full"
             />
           </div>
-          <h1>AUTO&mdash;DEALER</h1>
+          <h1>ET&mdash;CAR</h1>
         </Link>
         <CardTitle className="text-lg md:text-xl">Sign In</CardTitle>
         <CardDescription className="text-xs md:text-sm">

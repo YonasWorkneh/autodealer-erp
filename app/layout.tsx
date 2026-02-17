@@ -47,6 +47,7 @@ html {
                 <Header />
                 <div className="root">{children}</div>
               </main>
+              <Toaster />
             </Providers>
           </Protected>
         </div>

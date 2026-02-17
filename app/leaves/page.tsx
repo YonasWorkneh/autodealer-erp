@@ -34,7 +34,7 @@ export default function EmployeeLeavesPage() {
         error,
     } = useHR();
     const { user } = useUserStore();
-    const userRole = useUserRole();
+    const { role: userRole } = useUserRole();
     const [showDialog, setShowDialog] = useState(false);
 
     const [form, setForm] = useState({

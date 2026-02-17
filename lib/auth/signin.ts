@@ -7,6 +7,7 @@ interface SignInParams {
 }
 
 export const signin = async (data: SignInParams) => {
+  console.log("sign in body", data);
   try {
     const res = await fetch(`${process.env.BASE_API_URL}/auth/login`, {
       method: "POST",
@@ -15,6 +16,7 @@ export const signin = async (data: SignInParams) => {
       },
       body: JSON.stringify(data),
     });
+    console.log("sign in response", res);
     if (!res.ok) throw new Error("Something went wrong");
     const user = await res.json();
     if (!user.access)
@@ -50,7 +52,7 @@ export const getUser = async (id: number) => {
   try {
     console.log(process.env.BASE_API_URL);
     const res = await fetch(
-      `${process.env.BASE_API_URL}/users/user-profiles/${id}`
+      `${process.env.BASE_API_URL}/users/user-profiles/${id}`,
     );
     if (!res.ok) throw new Error("Something went wrong");
     const user = await res.json();

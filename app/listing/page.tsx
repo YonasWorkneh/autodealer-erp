@@ -50,14 +50,14 @@ export default function page() {
   const [searchQuery, setSearchQuery] = useState("");
   const { cars, isLoading, error, fetchCars } = useCarData();
   const router = useRouter();
-  const userRole = useUserRole();
+  const {role: userRole} = useUserRole();
 
   const getDisplayPrice = (car: any) => {
     if (car.sale_type === "auction" && car.bids && car.bids.length > 0) {
       const highestBid = Math.max(
         ...car.bids
           .map((b: any) => parseFloat(b.amount))
-          .filter((n: number) => !Number.isNaN(n))
+          .filter((n: number) => !Number.isNaN(n)),
       );
       return highestBid;
     }
@@ -167,7 +167,7 @@ export default function page() {
                         e.stopPropagation();
                         if (
                           confirm(
-                            "Are you sure you want to delete this listing?"
+                            "Are you sure you want to delete this listing?",
                           )
                         ) {
                           // TODO: Implement delete functionality
@@ -181,58 +181,9 @@ export default function page() {
 
                 <div className="relative">
                   {/* Status Badges */}
-                  <div className="absolute top-2 left-2 z-10 flex gap-2 flex-wrap">
-                    {/* Verification Status */}
-                    {car.verification_status === "verified" && (
-                      <Badge className="bg-green-500 text-white rounded-full">
-                        Verified
-                      </Badge>
-                    )}
-                    {car.verification_status === "pending" && (
-                      <Badge className="bg-yellow-500 text-white rounded-full">
-                        Pending
-                      </Badge>
-                    )}
-                    {car.verification_status === "rejected" && (
-                      <Badge className="bg-red-500 text-white rounded-full">
-                        Rejected
-                      </Badge>
-                    )}
-
-                    {/* Status (hidden when verification rejected) */}
-                    {car.verification_status !== "rejected" && (
-                      <>
-                        {car.status === "available" && (
-                          <Badge className="bg-blue-500 text-white rounded-full">
-                            Available
-                          </Badge>
-                        )}
-                        {car.status === "sold" && (
-                          <Badge className="bg-gray-500 text-white rounded-full">
-                            Sold
-                          </Badge>
-                        )}
-                      </>
-                    )}
-
-                    {/* Condition */}
-                    <Badge
-                      variant="outline"
-                      className="bg-white/90 capitalize rounded-full"
-                    >
-                      {car.condition}
-                    </Badge>
-                  </div>
-
                   <div className="flex justify-center bg-gray-50 py-6">
                     <img
-                      src={
-                        car.images && car.images.length > 0
-                          ? typeof car.images[0] === "string"
-                            ? car.images[0]
-                            : car.images[0].image_url
-                          : "/placeholder.svg"
-                      }
+                      src={car.featured_image}
                       alt={`${car.year} ${car.make} ${car.model}`}
                       className="w-full h-48 object-cover"
                     />
@@ -252,61 +203,6 @@ export default function page() {
                         {car.body_type}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-medium">Fuel:</span>
-                      <span className="text-foreground capitalize">
-                        {car.fuel_type}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-medium">Drive:</span>
-                      <span className="text-foreground uppercase">
-                        {car.drivetrain}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-medium">Mileage:</span>
-                      <span className="text-foreground">
-                        {car.mileage.toLocaleString()} km
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* VIN / Origin */}
-                  {(car.vin || car.origin) && (
-                    <div className="flex gap-4 text-xs text-muted-foreground mb-3">
-                      {car.vin && (
-                        <div className="flex items-center gap-1">
-                          <span className="font-medium text-foreground">
-                            VIN:
-                          </span>
-                          <span className="uppercase">{car.vin}</span>
-                        </div>
-                      )}
-                      {car.origin && (
-                        <div className="flex items-center gap-1">
-                          <span className="font-medium text-foreground">
-                            Origin:
-                          </span>
-                          <span className="capitalize">{car.origin}</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Color Info */}
-                  <div className="flex gap-4 text-xs text-muted-foreground mb-3">
-                    <div className="flex items-center gap-1">
-                      <div
-                        className="w-3 h-3 rounded-full border"
-                        style={{ backgroundColor: car.exterior_color }}
-                      />
-                      <span className="capitalize">{car.exterior_color}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      Interior:{" "}
-                      <span className="capitalize">{car.interior_color}</span>
-                    </div>
                   </div>
 
                   {/* Sale Type */}
@@ -315,8 +211,8 @@ export default function page() {
                       {car.sale_type === "fixed_price"
                         ? "Fixed Price"
                         : car.sale_type === "auction"
-                        ? "Auction"
-                        : car.sale_type}
+                          ? "Auction"
+                          : car.sale_type}
                     </Badge>
                   </div>
 
@@ -325,11 +221,6 @@ export default function page() {
                     <div className="text-2xl font-bold text-primary">
                       {getDisplayPrice(car).toLocaleString()} ETB
                     </div>
-                    {car.images && car.images.length > 1 && (
-                      <span className="text-xs text-muted-foreground">
-                        +{car.images.length - 1} photos
-                      </span>
-                    )}
                   </div>
                 </CardContent>
               </Card>

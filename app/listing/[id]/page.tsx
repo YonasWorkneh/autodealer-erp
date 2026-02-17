@@ -206,7 +206,7 @@ export default function CarDetailPage() {
             </Button>
             <Button
               variant="destructive"
-              className="cursor-pointer"
+              className="cursor-pointer text-white"
               onClick={() => {
                 if (confirm("Are you sure you want to delete this listing?")) {
                   // TODO: Implement delete functionality

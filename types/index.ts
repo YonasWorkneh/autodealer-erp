@@ -25,6 +25,22 @@ export interface CarBid {
 
 export interface Car {
   id: number;
+  featured_image: string;
+  make: string;
+  model: string;
+  year: number;
+  price: string | number;
+  model_ref: number;
+  make_ref: number;
+  body_type: string;
+  sale_type: string;
+  status: string;
+  seller: string;
+  created_at: string;
+}
+
+export interface CarDetail {
+  id: number;
   make: string;
   model: string;
   year: number;
@@ -181,14 +197,14 @@ export interface User {
 export interface DealerStaff {
   id: number;
   user: User;
-  role: "seller" | "accountant";
+  role: "seller" | "accountant" | "hr";
   assigned_at: string;
   updated_at: string;
 }
 
 export interface CreateDealerStaffRequest {
   user_email: string;
-  role: "seller" | "accountant";
+  role: "seller" | "accountant" | "hr";
 }
 
 export interface CarExpense {

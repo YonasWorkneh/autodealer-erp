@@ -2,20 +2,20 @@
 
 import React from "react";
 import { Input } from "./ui/input";
-import { Bell, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUserStore } from "@/store/user";
-import { useProfile } from "@/hooks/useProfile";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useProfileDetail } from "@/hooks/useProfileDetail";
 
 export default function Header() {
   const pathName = usePathname();
   const isAuthPage = pathName.includes("signin") || pathName.includes("signup");
   const { user } = useUserStore();
-  const { dealer } = useProfile();
-  const userRole = useUserRole();
+  const { role: userRole } = useUserRole();
+  const { profile } = useProfileDetail();
 
   if (isAuthPage) return null;
   return (
@@ -25,16 +25,29 @@ export default function Header() {
     >
       <div className="flex items-center space-x-4"></div>
       <div className="flex gap-10 items-center">
-        {/* notification */}
-        <Link href={"/"} className="relative">
-          <div className="bg-muted size-10 rounded-full grid place-items-center">
-            <Bell />
-          </div>
-          <div className="size-2 bg-primary rounded-full absolute top-1 right-1" />
-        </Link>
-        <div className="flex items-center space-x-10 bg-muted rounded-full p-4 py-1">
-          <div className="flex gap-2 items-center ">
-            <p className="text-sm">
+        {/* Profile Avatar with Name */}
+        <Link href="/settings" className="cursor-pointer flex items-center gap-3 hover:opacity-80 transition-opacity">
+          <Avatar className="size-10 border-2 border-primary/20 hover:border-primary/40 transition-colors">
+            <AvatarImage
+              src={profile?.image || profile?.image_url}
+              alt={`${profile?.first_name || ""} ${profile?.last_name || ""}`}
+              className="object-cover"
+            />
+            <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+              {profile?.first_name?.charAt(0)?.toUpperCase() || ""}
+              {profile?.last_name?.charAt(0)?.toUpperCase() || ""}
+              {!profile?.first_name && !profile?.last_name && user?.email?.charAt(0)?.toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col">
+            <span className="text-sm font-medium text-foreground">
+              {profile?.first_name && profile?.last_name
+                ? `${profile.first_name} ${profile.last_name}`
+                : profile?.first_name
+                  ? profile.first_name
+                  : user?.email?.split("@")[0] || "User"}
+            </span>
+            <span className="text-xs text-muted-foreground">
               {userRole === "dealer"
                 ? "System Admin"
                 : userRole === "hr"
@@ -44,14 +57,9 @@ export default function Header() {
                     : userRole === "seller"
                       ? "Seller"
                       : ""}
-            </p>
+            </span>
           </div>
-          {userRole !== "dealer" && (
-            <div className="text-muted-foreground bg-background rounded-full p-2 text-sm">
-              {dealer?.company_name}
-            </div>
-          )}
-        </div>
+        </Link>
       </div>
     </div>
   );

@@ -1,54 +1,65 @@
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { useUserStore } from "@/store/user";
 import { useDealerStaffStore } from "@/store/dealerStaff";
 import { useProfile } from "@/hooks/useProfile";
+import { useStaff } from "./useStaff";
+import { API_URL } from "@/lib/config";
+import { getCredentials } from "@/lib/credential";
 
 export type UserRole = "dealer" | "accountant" | "seller" | "hr";
 
-export function useUserRole(): UserRole {
+export function useUserRole() {
   const { user } = useUserStore();
-  const staff = useDealerStaffStore((state) => state.staff);
-  const { dealer } = useProfile();
-  const fetchStaff = useDealerStaffStore((state) => state.fetchStaff);
+  const [role, setRole] = useState<UserRole>("dealer");
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchStaff = async () => {
+    try {
+      setIsLoading(true);
+      const credential = await getCredentials();
+      if (!credential?.access) {
+        setRole("dealer");
+        return;
+      }
+
+      const res = await fetch(`${API_URL}/dealers/staff/me`, {
+        headers: {
+          Authorization: `Bearer ${credential.access}`,
+        },
+      });
+
+      if (res.ok) {
+        const staff = await res.json();
+        setRole(staff.role || "dealer");
+      } else {
+        setRole("dealer");
+      }
+    } catch (error) {
+      console.error("Failed to fetch user role:", error);
+      setRole("dealer");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (user.email) {
-      fetchStaff().catch(() => {
-        console.log("error getting staff");
-      });
+      fetchStaff();
+    } else {
+      setRole("dealer");
+      setIsLoading(false);
     }
-  }, [user.email, fetchStaff]);
+  }, [user.email]);
 
-  const userRole = useMemo<UserRole>(() => {
-    if (dealer?.role) {
-      const dealerRole = dealer.role.toLowerCase();
-      if (
-        dealerRole === "hr" ||
-        dealerRole === "dealer" ||
-        dealerRole === "accountant" ||
-        dealerRole === "seller"
-      ) {
-        return dealerRole as UserRole;
-      }
-      return "dealer";
-    }
+  // Refetch role when user changes or on focus
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchStaff();
+    };
 
-    if (user.is_staff) {
-      return "hr";
-    }
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [user.email]);
 
-    const currentUserStaff = staff.find((s) => s.user.email === user.email);
-    if (currentUserStaff) {
-      if (currentUserStaff.role === "accountant") {
-        return "accountant";
-      }
-      if (currentUserStaff.role === "seller") {
-        return "seller";
-      }
-    }
-
-    return "dealer";
-  }, [user, staff, dealer]);
-
-  return userRole;
+  return { role, isLoading };
 }

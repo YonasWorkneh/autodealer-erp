@@ -57,10 +57,10 @@ import { getDefaultRoute } from "@/lib/getDefaultRoute";
 
 export default function page() {
   const router = useRouter();
-  const userRole = useUserRole();
+  const { role: userRole } = useUserRole();
 
   useEffect(() => {
-    if (userRole !== "dealer") {
+    if (!isLoading && userRole !== "dealer") {
       const defaultRoute = getDefaultRoute(userRole);
       router.push(defaultRoute);
     }
@@ -252,13 +252,7 @@ export default function page() {
                         onClick={() => router.push(`/listing/${latestCar.id}`)}
                       >
                         <img
-                          src={
-                            latestCar.images && latestCar.images.length > 0
-                              ? typeof latestCar.images[0] === "string"
-                                ? latestCar.images[0]
-                                : latestCar.images[0].image_url
-                              : "/placeholder.svg"
-                          }
+                          src={latestCar.featured_image || "/placeholder.svg"}
                           alt={`${latestCar.year} ${latestCar.make} ${latestCar.model}`}
                           className="w-3/4 max-h-[225px] object-cover rounded-lg"
                         />
@@ -280,7 +274,7 @@ export default function page() {
                             {parseFloat(
                               typeof latestCar.price === "string"
                                 ? latestCar.price
-                                : String(latestCar.price)
+                                : String(latestCar.price),
                             ).toLocaleString()}
                           </p>
                         </div>
@@ -297,24 +291,6 @@ export default function page() {
                           className="bg-primary text-primary-foreground rounded-full capitalize"
                         >
                           {latestCar.body_type}
-                        </Badge>
-                        <Badge
-                          variant="secondary"
-                          className="bg-primary text-primary-foreground rounded-full capitalize"
-                        >
-                          {latestCar.fuel_type}
-                        </Badge>
-                        <Badge
-                          variant="secondary"
-                          className="bg-black text-white rounded-full uppercase"
-                        >
-                          {latestCar.drivetrain}
-                        </Badge>
-                        <Badge
-                          variant="secondary"
-                          className="bg-primary text-primary-foreground rounded-full capitalize"
-                        >
-                          {latestCar.condition}
                         </Badge>
                       </div>
                     </>
@@ -382,13 +358,7 @@ export default function page() {
                       >
                         <span className="text-sm w-4">{index + 1}</span>
                         <img
-                          src={
-                            car.images && car.images.length > 0
-                              ? typeof car.images[0] === "string"
-                                ? car.images[0]
-                                : car.images[0].image_url
-                              : "/placeholder.svg"
-                          }
+                          src={car.featured_image || "/placeholder.svg"}
                           alt={`${car.make} ${car.model}`}
                           className="w-20 h-auto object-cover rounded"
                         />
@@ -405,7 +375,7 @@ export default function page() {
                           {parseFloat(
                             typeof car.price === "string"
                               ? car.price
-                              : String(car.price)
+                              : String(car.price),
                           ).toLocaleString()}{" "}
                           ETB
                         </span>
@@ -467,9 +437,13 @@ export default function page() {
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3">
                     <span className="text-sm text-muted-foreground w-4">#</span>
-                    <span className="text-sm text-muted-foreground flex-1">Email</span>
+                    <span className="text-sm text-muted-foreground flex-1">
+                      Email
+                    </span>
                     <span className="text-sm text-muted-foreground">Sales</span>
-                    <span className="text-sm text-muted-foreground">Month/Year</span>
+                    <span className="text-sm text-muted-foreground">
+                      Month/Year
+                    </span>
                   </div>
 
                   {topSellers.length > 0 ? (
@@ -517,8 +491,12 @@ export default function page() {
                   <span className="text-sm text-muted-foreground flex-1">
                     Car Details
                   </span>
-                  <span className="text-sm text-muted-foreground">Sale Count</span>
-                  <span className="text-sm text-muted-foreground">Month/Year</span>
+                  <span className="text-sm text-muted-foreground">
+                    Sale Count
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    Month/Year
+                  </span>
                 </div>
 
                 {highSaleCars.length > 0 ? (

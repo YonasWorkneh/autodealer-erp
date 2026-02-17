@@ -21,7 +21,7 @@ import {
 import { useUserStore } from "@/store/user";
 import { updateProfile } from "@/lib/profileApi";
 import { changePassword } from "@/lib/auth/changePassword";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useProfileDetail } from "@/hooks/useProfileDetail";
 
 export default function AccountSettingsPage() {

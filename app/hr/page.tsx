@@ -6,6 +6,7 @@ import {
   FileText,
   Briefcase,
   ClipboardCheck,
+  DollarSign,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,6 +16,8 @@ import { AttendancesComponent } from "@/components/hr/Attendances";
 import { ChecklistAttendanceComponent } from "@/components/hr/ChecklistAttendance";
 import { ContractsComponent } from "@/components/hr/Contracts";
 import { LeavesComponent } from "@/components/hr/Leaves";
+import { SalaryComponent } from "@/components/hr/Salary";
+import { useUserRole } from "@/hooks/useUserRole";
 
 export default function HRPage() {
   const {
@@ -41,6 +44,8 @@ export default function HRPage() {
     deleteLeave,
   } = useHR();
 
+  const { isLoading: isUserRoleLoading } = useUserRole();
+
   // Only show loading screen on initial load (when no data exists yet)
   const isInitialLoad =
     isLoading &&
@@ -49,7 +54,7 @@ export default function HRPage() {
     contracts.length === 0 &&
     leaves.length === 0;
 
-  if (isInitialLoad) {
+  if (isInitialLoad || isUserRoleLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <p className="text-muted-foreground">Loading HR data...</p>
@@ -67,13 +72,13 @@ export default function HRPage() {
 
   const activeEmployees = employees.filter((emp) => emp.is_active).length;
   const presentAttendances = attendances.filter(
-    (att) => att.status === "present"
+    (att) => att.status === "present",
   ).length;
   const activeContracts = contracts.filter(
-    (cont) => cont.status === "active"
+    (cont) => cont.status === "active",
   ).length;
   const pendingLeaves = leaves.filter(
-    (leave) => leave.status === "pending"
+    (leave) => leave.status === "pending",
   ).length;
 
   return (
@@ -170,6 +175,10 @@ export default function HRPage() {
               <FileText className="h-4 w-4 mr-2" />
               Leave Requests
             </TabsTrigger>
+            <TabsTrigger value="salary">
+              <DollarSign className="h-4 w-4 mr-2" />
+              Salary Components
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="employees">
@@ -222,6 +231,10 @@ export default function HRPage() {
               updateLeave={updateLeave}
               deleteLeave={deleteLeave}
             />
+          </TabsContent>
+
+          <TabsContent value="salary">
+            <SalaryComponent />
           </TabsContent>
         </Tabs>
       </div>

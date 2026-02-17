@@ -52,7 +52,7 @@ export default function StaffPage() {
     password1: "",
     password2: "",
   });
-  const userRole = useUserRole();
+  const { role: userRole } = useUserRole();
 
   const handleCreateStaff = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -297,16 +297,17 @@ export default function StaffPage() {
                   <Label htmlFor="role">Role</Label>
                   <Select
                     value={formData.role}
-                    onValueChange={(value: "seller" | "accountant") =>
+                    onValueChange={(value: "seller" | "accountant" | "hr") =>
                       setFormData({ ...formData, role: value })
                     }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select role" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="z-[50001]">
                       <SelectItem value="seller">Seller</SelectItem>
                       <SelectItem value="accountant">Accountant</SelectItem>
+                      <SelectItem value="hr">HR</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -393,7 +394,7 @@ export default function StaffPage() {
               {staff.map((staffMember) => {
                 const initials = getInitials(
                   staffMember.user.first_name,
-                  staffMember.user.last_name
+                  staffMember.user.last_name,
                 );
                 return (
                   <div
@@ -403,7 +404,7 @@ export default function StaffPage() {
                     <div className="flex items-center space-x-4">
                       <div
                         className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-medium ${getAvatarColor(
-                          initials
+                          initials,
                         )}`}
                       >
                         {initials}
@@ -420,7 +421,7 @@ export default function StaffPage() {
                           {getRoleIcon(staffMember.role)}
                           <Badge
                             className={`${getRoleColor(
-                              staffMember.role
+                              staffMember.role,
                             )} text-xs`}
                           >
                             {staffMember.role.charAt(0).toUpperCase() +
@@ -495,7 +496,7 @@ export default function StaffPage() {
                   <SelectTrigger>
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[50001]">
                     <SelectItem value="seller">Seller</SelectItem>
                     <SelectItem value="accountant">Accountant</SelectItem>
                   </SelectContent>
