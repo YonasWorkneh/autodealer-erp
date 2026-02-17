@@ -155,7 +155,7 @@ export default function HRPage() {
         </div>
 
         <Tabs defaultValue="employees" className="w-full">
-          <TabsList className="mb-6">
+          <TabsList className="mb-6 border p-4 py-2 h-fit">
             <TabsTrigger value="employees">
               <Users className="h-4 w-4 mr-2" />
               Employees

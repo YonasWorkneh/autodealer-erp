@@ -2,26 +2,26 @@
 
 import { useState } from "react";
 import {
-  Plus,
   Edit,
   Trash2,
   MoreHorizontal,
   DollarSign,
   Clock,
   CheckCircle,
+  ChevronDown,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -41,6 +41,16 @@ import { Switch } from "@/components/ui/switch";
 import { Employee, CreateEmployeeRequest } from "@/types";
 import { useSalaryCpts } from "@/hooks/payroll";
 import { assignSalaryComponent, createOvertime } from "@/lib/payroll";
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { useToast } from "../ui/use-toast";
 
 interface EmployeesProps {
   employees: Employee[];
@@ -58,6 +68,7 @@ export function EmployeesComponent({
   updateEmployee,
   deleteEmployee,
 }: EmployeesProps) {
+  const { toast } = useToast();
   const [showDialog, setShowDialog] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [showSalaryDialog, setShowSalaryDialog] = useState(false);
@@ -109,7 +120,11 @@ export function EmployeesComponent({
       });
     } catch (error) {
       console.error("Error saving employee:", error);
-      alert("Failed to save employee. Please try again.");
+      toast({
+        title: "Error",
+        description: "Failed to save employee. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -131,7 +146,11 @@ export function EmployeesComponent({
         await deleteEmployee(id);
       } catch (error) {
         console.error("Error deleting employee:", error);
-        alert("Failed to delete employee. Please try again.");
+        toast({
+          title: "Error",
+          description: "Failed to delete employee. Please try again.",
+          variant: "destructive",
+        });
       }
     }
   };
@@ -156,10 +175,18 @@ export function EmployeesComponent({
       setShowSalaryDialog(false);
       setSelectedEmployee(null);
       setSalaryForm({ component: "", amount: "" });
-      alert("Salary component assigned successfully!");
+      toast({
+        title: "Success",
+        description: "Salary component assigned successfully!",
+        variant: "success",
+      });
     } catch (error) {
       console.error("Error assigning salary component:", error);
-      alert("Failed to assign salary component. Please try again.");
+      toast({
+        title: "Error",
+        description: "Failed to assign salary component. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -194,10 +221,18 @@ export function EmployeesComponent({
         approved: true,
         date: "",
       });
-      alert("Overtime created successfully!");
+      toast({
+        title: "Success",
+        description: "Overtime created successfully!",
+        variant: "success",
+      });
     } catch (error) {
       console.error("Error creating overtime:", error);
-      alert("Failed to create overtime. Please try again.");
+      toast({
+        title: "Error",
+        description: "Failed to create overtime. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -491,17 +526,20 @@ export function EmployeesComponent({
                 <Select
                   value={overtimeForm.overtime_type}
                   onValueChange={(value) =>
-                    setOvertimeForm({ ...overtimeForm, overtime_type: value })
+                    setOvertimeForm({
+                      ...overtimeForm,
+                      overtime_type: value,
+                    })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="overtime_type">
                     <SelectValue placeholder="Select overtime type" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1.5">1.5x Rate</SelectItem>
-                    <SelectItem value="1.75">1.75x Rate</SelectItem>
-                    <SelectItem value="2.0">2.0x Rate</SelectItem>
-                    <SelectItem value="2.5">2.5x Rate</SelectItem>
+                  <SelectContent className="z-50001">
+                    <SelectItem value="1.5">1.5x</SelectItem>
+                    <SelectItem value="1.75">1.75x</SelectItem>
+                    <SelectItem value="2.0">2.0x </SelectItem>
+                    <SelectItem value="2.5">2.5x</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
