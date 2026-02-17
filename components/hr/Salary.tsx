@@ -57,6 +57,8 @@ export function SalaryComponent() {
     salaryCptErr,
   } = useSalaryCpts();
 
+  console.log("salaryCptErr", salaryCptErr);
+
   const safeSalaryCpts = salaryCpts || [];
 
   const handleCreateComponent = async () => {
@@ -115,103 +117,128 @@ export function SalaryComponent() {
             <DialogTrigger asChild>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
-                Create Salary
+                Create Component
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Create Salary Component</DialogTitle>
                 <DialogDescription>
-                  Add a new salary component to the system.
+                  Add a new salary component for payroll calculations.
                 </DialogDescription>
               </DialogHeader>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Component Name</Label>
-                  <Input
-                    id="name"
-                    placeholder="Enter component name"
-                    value={newComponent.name}
-                    onChange={(e) =>
-                      setNewComponent({ ...newComponent, name: e.target.value })
-                    }
-                  />
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleCreateComponent();
+                }}
+              >
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="name">Name</Label>
+                    <Input
+                      id="name"
+                      placeholder="Enter component name"
+                      value={newComponent.name}
+                      onChange={(e) =>
+                        setNewComponent({
+                          ...newComponent,
+                          name: e.target.value,
+                        })
+                      }
+                      required
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="component_type">Type</Label>
+                    <Select
+                      value={newComponent.component_type}
+                      onValueChange={(value) =>
+                        setNewComponent({
+                          ...newComponent,
+                          component_type: value,
+                        })
+                      }
+                      required
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select component type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="earning">Earning</SelectItem>
+                        <SelectItem value="deduction">Deduction</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="component_type">Component Type</Label>
-                  <Input
-                    id="component_type"
-                    placeholder="Enter component type"
-                    value={newComponent.component_type}
-                    onChange={(e) =>
-                      setNewComponent({
-                        ...newComponent,
-                        component_type: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsCreateModalOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleCreateComponent}
-                  disabled={!newComponent.name.trim() || isCreating}
-                >
-                  {isCreating ? "Creating..." : "Create Component"}
-                </Button>
-              </DialogFooter>
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsCreateModalOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isCreating}>
+                    {isCreating ? "Creating..." : "Create"}
+                  </Button>
+                </DialogFooter>
+              </form>
             </DialogContent>
           </Dialog>
         </div>
       </CardHeader>
       <CardContent>
-        {isLoadingSalaryComponents ? (
-          <div className="flex items-center justify-center h-32">
-            <p className="text-muted-foreground">
-              Loading salary components...
-            </p>
-          </div>
-        ) : (
-          <Table>
-            <TableHeader>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Type</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {salaryCptErr ? (
+              <div className="mt-2 mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">!</span>
+                  </div>
+                  <div>
+                    <h3 className="text-red-800 font-medium">
+                      Error Loading Data
+                    </h3>
+                    <p className="text-red-600 text-sm">
+                      Failed to fetch salary components. Please check your
+                      connection and try again.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : safeSalaryCpts?.length === 0 ? (
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Component Type</TableHead>
+                <TableCell colSpan={2} className="text-center py-8">
+                  <p className="text-muted-foreground">
+                    No salary components found
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Create your first salary component to get started
+                  </p>
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {safeSalaryCpts?.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={2} className="text-center py-8">
-                    <p className="text-muted-foreground">
-                      No salary components found
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Create your first salary component to get started
-                    </p>
+            ) : (
+              safeSalaryCpts?.map((component: SalaryComponent) => (
+                <TableRow key={component.id}>
+                  <TableCell className="font-medium">
+                    {component.name}
+                  </TableCell>
+                  <TableCell>
+                    {getComponentTypeBadge(component.component_type)}
                   </TableCell>
                 </TableRow>
-              ) : (
-                safeSalaryCpts?.map((component: SalaryComponent) => (
-                  <TableRow key={component.id}>
-                    <TableCell className="font-medium">
-                      {component.name}
-                    </TableCell>
-                    <TableCell>
-                      {getComponentTypeBadge(component.component_type)}
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        )}
+              ))
+            )}
+          </TableBody>
+        </Table>
       </CardContent>
     </Card>
   );
