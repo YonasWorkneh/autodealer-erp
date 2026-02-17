@@ -6,7 +6,7 @@ import { useStaff } from "./useStaff";
 import { API_URL } from "@/lib/config";
 import { getCredentials } from "@/lib/credential";
 
-export type UserRole = "dealer" | "accountant" | "seller" | "hr";
+export type UserRole = "dealer" | "accountant" | "seller" | "hr" | "finance";
 
 export function useUserRole() {
   const { user } = useUserStore();

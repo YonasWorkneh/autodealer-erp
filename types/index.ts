@@ -197,14 +197,14 @@ export interface User {
 export interface DealerStaff {
   id: number;
   user: User;
-  role: "seller" | "accountant" | "hr";
+  role: "seller" | "accountant" | "hr" | "finance";
   assigned_at: string;
   updated_at: string;
 }
 
 export interface CreateDealerStaffRequest {
   user_email: string;
-  role: "seller" | "accountant" | "hr";
+  role: "seller" | "accountant" | "hr" | "finance";
 }
 
 export interface CarExpense {

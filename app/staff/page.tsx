@@ -297,9 +297,9 @@ export default function StaffPage() {
                   <Label htmlFor="role">Role</Label>
                   <Select
                     value={formData.role}
-                    onValueChange={(value: "seller" | "accountant" | "hr") =>
-                      setFormData({ ...formData, role: value })
-                    }
+                    onValueChange={(
+                      value: "seller" | "accountant" | "hr" | "finance",
+                    ) => setFormData({ ...formData, role: value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select role" />
@@ -308,6 +308,7 @@ export default function StaffPage() {
                       <SelectItem value="seller">Seller</SelectItem>
                       <SelectItem value="accountant">Accountant</SelectItem>
                       <SelectItem value="hr">HR</SelectItem>
+                      <SelectItem value="finance">Finance</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

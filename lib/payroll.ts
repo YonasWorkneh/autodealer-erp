@@ -86,3 +86,50 @@ export const createOvertime = async (
   });
   return response.json();
 };
+
+export const getPayrollRuns = async () => {
+  try {
+    const credential = await getCredentials();
+    const { access } = credential;
+    const response = await fetch(`${API_URL}/payroll/payroll-runs`, {
+      headers: {
+        Authorization: `Bearer ${access}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Failed to fetch payroll runs");
+    }
+    return response.json();
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+};
+
+export const createPayrollRun = async (period: string) => {
+  const credential = await getCredentials();
+  const { access } = credential;
+  const response = await fetch(`${API_URL}/payroll/payroll-runs`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${access}`,
+    },
+    body: JSON.stringify({
+      period,
+    }),
+  });
+  return response.json();
+};
+
+export const runPayroll = async (id: number) => {
+  const credential = await getCredentials();
+  const { access } = credential;
+  const response = await fetch(`${API_URL}/payroll/payroll-runs/${id}/run`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${access}`,
+    },
+  });
+  return response.json();
+};

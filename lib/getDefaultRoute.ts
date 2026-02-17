@@ -11,6 +11,8 @@ export function getDefaultRoute(role: UserRole): string {
       return "/hr";
     case "seller":
       return "/listing"; // Cars listing page
+    case "finance":
+      return "/finance";
     case "dealer":
     default:
       return "/"; // Dashboard
