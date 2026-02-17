@@ -46,6 +46,8 @@ export default function HRPage() {
 
   const { isLoading: isUserRoleLoading } = useUserRole();
 
+  console.log("isUserRoleLoading:", isUserRoleLoading);
+
   // Only show loading screen on initial load (when no data exists yet)
   const isInitialLoad =
     isLoading &&
@@ -54,7 +56,7 @@ export default function HRPage() {
     contracts.length === 0 &&
     leaves.length === 0;
 
-  if (isInitialLoad || isUserRoleLoading) {
+  if (isInitialLoad) {
     return (
       <div className="flex items-center justify-center h-screen">
         <p className="text-muted-foreground">Loading HR data...</p>

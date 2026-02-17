@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Edit, Trash2, MoreHorizontal } from "lucide-react";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  MoreHorizontal,
+  DollarSign,
+  Clock,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -31,13 +38,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
 import { Employee, CreateEmployeeRequest } from "@/types";
+import { useSalaryCpts } from "@/hooks/payroll";
+import { assignSalaryComponent, createOvertime } from "@/lib/payroll";
 
 interface EmployeesProps {
   employees: Employee[];
   createEmployee: (employee: CreateEmployeeRequest) => Promise<void>;
   updateEmployee: (
     id: number,
-    employee: Partial<CreateEmployeeRequest>
+    employee: Partial<CreateEmployeeRequest>,
   ) => Promise<void>;
   deleteEmployee: (id: number) => Promise<void>;
 }
@@ -50,6 +59,11 @@ export function EmployeesComponent({
 }: EmployeesProps) {
   const [showDialog, setShowDialog] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+  const [showSalaryDialog, setShowSalaryDialog] = useState(false);
+  const [showOvertimeDialog, setShowOvertimeDialog] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
+    null,
+  );
 
   const [form, setForm] = useState<CreateEmployeeRequest>({
     user_email: "",
@@ -58,6 +72,20 @@ export function EmployeesComponent({
     salary: "",
     is_active: true,
   });
+
+  const [salaryForm, setSalaryForm] = useState({
+    component: "",
+    amount: "",
+  });
+
+  const [overtimeForm, setOvertimeForm] = useState({
+    overtime_type: "1.5",
+    hours: "",
+    approved: true,
+    date: "",
+  });
+
+  const { salaryCpts } = useSalaryCpts();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,6 +130,71 @@ export function EmployeesComponent({
         console.error("Error deleting employee:", error);
         alert("Failed to delete employee. Please try again.");
       }
+    }
+  };
+
+  const handleAssignSalary = (employee: Employee) => {
+    setSelectedEmployee(employee);
+    setSalaryForm({ component: "", amount: "" });
+    setShowSalaryDialog(true);
+  };
+
+  const handleSalarySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedEmployee || !salaryForm.component || !salaryForm.amount)
+      return;
+
+    try {
+      await assignSalaryComponent(
+        selectedEmployee.id,
+        parseInt(salaryForm.component),
+        parseFloat(salaryForm.amount),
+      );
+      setShowSalaryDialog(false);
+      setSelectedEmployee(null);
+      setSalaryForm({ component: "", amount: "" });
+      alert("Salary component assigned successfully!");
+    } catch (error) {
+      console.error("Error assigning salary component:", error);
+      alert("Failed to assign salary component. Please try again.");
+    }
+  };
+
+  const handleCreateOvertime = (employee: Employee) => {
+    setSelectedEmployee(employee);
+    setOvertimeForm({
+      overtime_type: "1.5",
+      hours: "",
+      approved: true,
+      date: new Date().toISOString().split("T")[0], // Today's date
+    });
+    setShowOvertimeDialog(true);
+  };
+
+  const handleOvertimeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedEmployee || !overtimeForm.hours || !overtimeForm.date) return;
+
+    try {
+      await createOvertime(
+        selectedEmployee.id,
+        overtimeForm.overtime_type,
+        parseFloat(overtimeForm.hours),
+        overtimeForm.approved,
+        overtimeForm.date,
+      );
+      setShowOvertimeDialog(false);
+      setSelectedEmployee(null);
+      setOvertimeForm({
+        overtime_type: "1.5",
+        hours: "",
+        approved: true,
+        date: "",
+      });
+      alert("Overtime created successfully!");
+    } catch (error) {
+      console.error("Error creating overtime:", error);
+      alert("Failed to create overtime. Please try again.");
     }
   };
 
@@ -224,6 +317,8 @@ export function EmployeesComponent({
                 <th className="text-left p-2">Position</th>
                 <th className="text-left p-2">Hire Date</th>
                 <th className="text-left p-2">Salary</th>
+                <th className="text-left p-2">Salary Components</th>
+                <th className="text-left p-2">Overtime</th>
                 <th className="text-left p-2">Status</th>
                 <th className="text-right p-2">Actions</th>
               </tr>
@@ -243,6 +338,26 @@ export function EmployeesComponent({
                       {new Date(employee.hire_date).toLocaleDateString()}
                     </td>
                     <td className="p-2">${employee.salary}</td>
+                    <td className="p-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleAssignSalary(employee)}
+                      >
+                        <DollarSign className="h-4 w-4 mr-1" />
+                        Assign
+                      </Button>
+                    </td>
+                    <td className="p-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleCreateOvertime(employee)}
+                      >
+                        <Clock className="h-4 w-4 mr-1" />
+                        Add Overtime
+                      </Button>
+                    </td>
                     <td className="p-2">
                       <Badge
                         variant={employee.is_active ? "default" : "secondary"}
@@ -279,7 +394,7 @@ export function EmployeesComponent({
               ) : (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={9}
                     className="p-8 text-center text-muted-foreground"
                   >
                     No employees found. Add your first employee to get started.
@@ -290,6 +405,151 @@ export function EmployeesComponent({
           </table>
         </div>
       </CardContent>
+
+      {/* Salary Assignment Dialog */}
+      <Dialog open={showSalaryDialog} onOpenChange={setShowSalaryDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Assign Salary Component</DialogTitle>
+            <DialogDescription>
+              Assign a salary component to{" "}
+              {selectedEmployee?.full_name ||
+                selectedEmployee?.user_email_display}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSalarySubmit}>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="component">Salary Component</Label>
+                <Select
+                  value={salaryForm.component}
+                  onValueChange={(value) =>
+                    setSalaryForm({ ...salaryForm, component: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a salary component" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {salaryCpts?.map((component: any) => (
+                      <SelectItem key={component.id} value={component.id}>
+                        {component.name} ({component.component_type})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="amount">Amount</Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  step="0.01"
+                  placeholder="Enter amount"
+                  value={salaryForm.amount}
+                  onChange={(e) =>
+                    setSalaryForm({ ...salaryForm, amount: e.target.value })
+                  }
+                  required
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowSalaryDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit">Assign Component</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Overtime Dialog */}
+      <Dialog open={showOvertimeDialog} onOpenChange={setShowOvertimeDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Overtime</DialogTitle>
+            <DialogDescription>
+              Create overtime record for{" "}
+              {selectedEmployee?.full_name ||
+                selectedEmployee?.user_email_display}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleOvertimeSubmit}>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="overtime_type">Overtime Type</Label>
+                <Select
+                  value={overtimeForm.overtime_type}
+                  onValueChange={(value) =>
+                    setOvertimeForm({ ...overtimeForm, overtime_type: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select overtime type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1.5">1.5x Rate</SelectItem>
+                    <SelectItem value="1.75">1.75x Rate</SelectItem>
+                    <SelectItem value="2.0">2.0x Rate</SelectItem>
+                    <SelectItem value="2.5">2.5x Rate</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="hours">Hours</Label>
+                <Input
+                  id="hours"
+                  type="number"
+                  step="0.5"
+                  placeholder="Enter overtime hours"
+                  value={overtimeForm.hours}
+                  onChange={(e) =>
+                    setOvertimeForm({ ...overtimeForm, hours: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="date">Date</Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={overtimeForm.date}
+                  onChange={(e) =>
+                    setOvertimeForm({ ...overtimeForm, date: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="approved"
+                  checked={overtimeForm.approved}
+                  onCheckedChange={(checked) =>
+                    setOvertimeForm({ ...overtimeForm, approved: checked })
+                  }
+                />
+                <Label htmlFor="approved">Approved</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowOvertimeDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit">Create Overtime</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

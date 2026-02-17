@@ -11,54 +11,48 @@ export type UserRole = "dealer" | "accountant" | "seller" | "hr";
 export function useUserRole() {
   const { user } = useUserStore();
   const [role, setRole] = useState<UserRole>("dealer");
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchStaff = async () => {
-    try {
-      setIsLoading(true);
-      const credential = await getCredentials();
-      if (!credential?.access) {
-        setRole("dealer");
-        return;
-      }
-
-      const res = await fetch(`${API_URL}/dealers/staff/me`, {
-        headers: {
-          Authorization: `Bearer ${credential.access}`,
-        },
-      });
-
-      if (res.ok) {
-        const staff = await res.json();
-        setRole(staff.role || "dealer");
-      } else {
-        setRole("dealer");
-      }
-    } catch (error) {
-      console.error("Failed to fetch user role:", error);
-      setRole("dealer");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (user.email) {
-      fetchStaff();
-    } else {
-      setRole("dealer");
-      setIsLoading(false);
-    }
-  }, [user.email]);
+    console.log("useEffect triggered, user.email:", user.email);
+    const fetchRole = async () => {
+      try {
+        setIsLoading(true);
+        const credential = await getCredentials();
+        console.log("Credential:", credential);
 
-  // Refetch role when user changes or on focus
-  useEffect(() => {
-    const handleFocus = () => {
-      fetchStaff();
+        if (!credential?.access) {
+          console.log("No access token found");
+          setRole("dealer");
+          return;
+        }
+
+        const res = await fetch(`${API_URL}/dealers/staff/me`, {
+          headers: {
+            Authorization: `Bearer ${credential.access}`,
+          },
+        });
+
+        console.log("Response status:", res.status);
+
+        if (res.ok) {
+          const staff = await res.json();
+          console.log("Staff:", staff);
+          setRole(staff.role || "dealer");
+        } else {
+          console.log("Response not ok, defaulting to dealer");
+          setRole("dealer");
+        }
+      } catch (error) {
+        console.error("Failed to fetch user role:", error);
+        setRole("dealer");
+      } finally {
+        console.log("isLoading finished, setting to false");
+        setIsLoading(false);
+      }
     };
 
-    window.addEventListener("focus", handleFocus);
-    return () => window.removeEventListener("focus", handleFocus);
+    fetchRole();
   }, [user.email]);
 
   return { role, isLoading };

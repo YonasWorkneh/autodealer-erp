@@ -37,18 +37,19 @@ import { createSalaryComponent } from "@/lib/payroll";
 interface SalaryComponent {
   id: number;
   name: string;
-  component_type: "earning" | "deduction";
+  component_type: string;
 }
 
 export function SalaryComponent() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newComponent, setNewComponent] = useState({
     name: "",
-    component_type: "earning" as "earning" | "deduction",
+    component_type: "",
   });
   const [isCreating, setIsCreating] = useState(false);
 
-  const { salaryCpts, isLoadingSalaryComponents, refetchSalaryCpts } = useSalaryCpts();
+  const { salaryCpts, isLoadingSalaryComponents, refetchSalaryCpts } =
+    useSalaryCpts();
 
   console.log("salaryCpts", salaryCpts);
 
@@ -57,8 +58,11 @@ export function SalaryComponent() {
 
     setIsCreating(true);
     try {
-      await createSalaryComponent(newComponent.name, newComponent.component_type);
-      setNewComponent({ name: "", component_type: "earning" });
+      await createSalaryComponent(
+        newComponent.name,
+        newComponent.component_type,
+      );
+      setNewComponent({ name: "", component_type: "" });
       setIsCreateModalOpen(false);
       refetchSalaryCpts();
     } catch (error) {
@@ -119,20 +123,17 @@ export function SalaryComponent() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="component_type">Component Type</Label>
-                  <Select
+                  <Input
+                    id="component_type"
+                    placeholder="Enter component type"
                     value={newComponent.component_type}
-                    onValueChange={(value: "earning" | "deduction") =>
-                      setNewComponent({ ...newComponent, component_type: value })
+                    onChange={(e) =>
+                      setNewComponent({
+                        ...newComponent,
+                        component_type: e.target.value,
+                      })
                     }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select component type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="earning">Earning</SelectItem>
-                      <SelectItem value="deduction">Deduction</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  />
                 </div>
               </div>
               <DialogFooter>
@@ -156,7 +157,9 @@ export function SalaryComponent() {
       <CardContent>
         {isLoadingSalaryComponents ? (
           <div className="flex items-center justify-center h-32">
-            <p className="text-muted-foreground">Loading salary components...</p>
+            <p className="text-muted-foreground">
+              Loading salary components...
+            </p>
           </div>
         ) : (
           <Table>
@@ -170,7 +173,9 @@ export function SalaryComponent() {
               {salaryCpts?.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={2} className="text-center py-8">
-                    <p className="text-muted-foreground">No salary components found</p>
+                    <p className="text-muted-foreground">
+                      No salary components found
+                    </p>
                     <p className="text-sm text-muted-foreground mt-1">
                       Create your first salary component to get started
                     </p>
@@ -179,7 +184,9 @@ export function SalaryComponent() {
               ) : (
                 salaryCpts?.map((component: SalaryComponent) => (
                   <TableRow key={component.id}>
-                    <TableCell className="font-medium">{component.name}</TableCell>
+                    <TableCell className="font-medium">
+                      {component.name}
+                    </TableCell>
                     <TableCell>
                       {getComponentTypeBadge(component.component_type)}
                     </TableCell>
