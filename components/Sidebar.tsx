@@ -11,6 +11,7 @@ import {
   Briefcase,
   Calendar,
   Receipt,
+  DollarSign,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -45,6 +46,12 @@ export default function Sidebar() {
       roles: ["accountant"],
     },
     { label: "HR", href: "/hr", icon: Briefcase, roles: ["hr"] },
+    {
+      label: "Payroll",
+      href: "/finance",
+      icon: DollarSign,
+      roles: ["finance"],
+    },
     {
       label: "Leaves",
       href: "/leaves",
@@ -115,33 +122,57 @@ export default function Sidebar() {
               ? pathName === link.href
               : pathName.includes(link.href);
           return (
-            <Link
-              href={link.href}
+            <div
               key={link.href}
-              className={`hover:bg-primary-hover hover:text-white cursor-pointer size-10 rounded-full grid place-items-center transition-colors ${
-                active
-                  ? " bg-white text-primary shadow-md"
-                  : "text-primary-foreground bg-transparent"
-              }`}
+              className="relative group flex items-center flex-col gap-2"
             >
-              <link.icon className="h-6 w-6" />
-            </Link>
+              <Link
+                href={link.href}
+                className={`hover:bg-primary-hover hover:text-white cursor-pointer size-10 rounded-full grid place-items-center transition-colors ${
+                  active
+                    ? " bg-white text-primary shadow-md"
+                    : "text-primary-foreground bg-transparent"
+                }`}
+              >
+                <link.icon className="h-6 w-6" />
+              </Link>
+              {/* Hover Label */}
+              <div className="transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out pointer-events-none whitespace-nowrap">
+                <span className="text-white text-xs px-2 py-1 rounded">
+                  {link.label}
+                </span>
+              </div>
+            </div>
           );
         })}
       </div>
       <div className="flex gap-10 flex-col absolute bottom-10">
-        <Link
-          href={"/settings"}
-          className="text-primary-foreground hover:bg-primary-hover hover:text-white cursor-pointer size-10 rounded-full grid place-items-center transition-colors"
-        >
-          <Settings className="size-5" />
-        </Link>
-        <button
-          onClick={handleLogout}
-          className="text-primary-foreground hover:bg-primary-hover hover:text-white cursor-pointer size-10 rounded-full grid place-items-center transition-colors"
-        >
-          <LogOut className="size-5" />
-        </button>
+        <div className="relative group flex items-center flex-col gap-2">
+          <Link
+            href={"/settings"}
+            className="text-primary-foreground hover:bg-primary-hover hover:text-white cursor-pointer size-10 rounded-full grid place-items-center transition-colors"
+          >
+            <Settings className="size-5" />
+          </Link>
+          {/* Hover Label */}
+          <div className=" top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out pointer-events-none whitespace-nowrap">
+            <span className="text-white text-xs px-2 py-1 rounded">
+              Settings
+            </span>
+          </div>
+        </div>
+        <div className="relative group flex items-center flex-col gap-2">
+          <button
+            onClick={handleLogout}
+            className="text-primary-foreground hover:bg-primary-hover hover:text-white cursor-pointer size-10 rounded-full grid place-items-center transition-colors"
+          >
+            <LogOut className="size-5" />
+          </button>
+          {/* Hover Label */}
+          <div className=" top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out pointer-events-none whitespace-nowrap">
+            <span className="text-white text-xs px-2 py-1 rounded">Logout</span>
+          </div>
+        </div>
       </div>
     </aside>
   );
