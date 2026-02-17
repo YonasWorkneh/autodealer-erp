@@ -7,18 +7,27 @@ export const createSalaryComponent = async (
 ) => {
   const credential = await getCredentials();
   const { access } = credential;
-  const response = await fetch(`${API_URL}/hr/salary-components`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${access}`,
-    },
-    body: JSON.stringify({
-      name,
-      component_type,
-    }),
-  });
-  return response.json();
+  console.log("name", name);
+  console.log("component_type", component_type);
+  try {
+    const response = await fetch(`${API_URL}/hr/salary-components`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${access}`,
+      },
+      body: JSON.stringify({
+        name,
+        component_type,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to create salary component");
+    }
+    return response.json();
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const getSalaryComponents = async () => {
@@ -35,8 +44,7 @@ export const getSalaryComponents = async () => {
     }
     return response.json();
   } catch (error) {
-    console.error(error);
-    return [];
+    throw error;
   }
 };
 
@@ -101,8 +109,7 @@ export const getPayrollRuns = async () => {
     }
     return response.json();
   } catch (error) {
-    console.error(error);
-    return [];
+    throw error;
   }
 };
 

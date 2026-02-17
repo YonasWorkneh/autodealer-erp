@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/table";
 import { useSalaryCpts } from "@/hooks/payroll";
 import { createSalaryComponent } from "@/lib/payroll";
+import { useToast } from "@/hooks/use-toast";
 
 interface SalaryComponent {
   id: number;
@@ -47,11 +48,16 @@ export function SalaryComponent() {
     component_type: "",
   });
   const [isCreating, setIsCreating] = useState(false);
+  const { toast } = useToast();
 
-  const { salaryCpts, isLoadingSalaryComponents, refetchSalaryCpts } =
-    useSalaryCpts();
+  const {
+    salaryCpts,
+    isLoadingSalaryComponents,
+    refetchSalaryCpts,
+    salaryCptErr,
+  } = useSalaryCpts();
 
-  console.log("salaryCpts", salaryCpts);
+  const safeSalaryCpts = salaryCpts || [];
 
   const handleCreateComponent = async () => {
     if (!newComponent.name.trim()) return;
@@ -65,8 +71,18 @@ export function SalaryComponent() {
       setNewComponent({ name: "", component_type: "" });
       setIsCreateModalOpen(false);
       refetchSalaryCpts();
+      toast({
+        title: "Salary Component Created",
+        variant: "success",
+        description: `${newComponent.name} has been successfully created.`,
+      });
     } catch (error) {
       console.error("Failed to create salary component:", error);
+      toast({
+        title: "Failed to Create Salary Component",
+        variant: "destructive",
+        description: "Please try again.",
+      });
     } finally {
       setIsCreating(false);
     }
@@ -170,7 +186,7 @@ export function SalaryComponent() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {salaryCpts?.length === 0 ? (
+              {safeSalaryCpts?.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={2} className="text-center py-8">
                     <p className="text-muted-foreground">
@@ -182,7 +198,7 @@ export function SalaryComponent() {
                   </TableCell>
                 </TableRow>
               ) : (
-                salaryCpts?.map((component: SalaryComponent) => (
+                safeSalaryCpts?.map((component: SalaryComponent) => (
                   <TableRow key={component.id}>
                     <TableCell className="font-medium">
                       {component.name}

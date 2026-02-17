@@ -8,6 +8,7 @@ import {
   MoreHorizontal,
   DollarSign,
   Clock,
+  CheckCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -86,6 +87,8 @@ export function EmployeesComponent({
   });
 
   const { salaryCpts } = useSalaryCpts();
+
+  const safeSalaryCpts = salaryCpts || [];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -337,14 +340,15 @@ export function EmployeesComponent({
                     <td className="p-2 text-sm">
                       {new Date(employee.hire_date).toLocaleDateString()}
                     </td>
-                    <td className="p-2">${employee.salary}</td>
+                    <td className="p-2">ETB {employee.salary}</td>
                     <td className="p-2">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleAssignSalary(employee)}
+                        className="cursor-pointer"
                       >
-                        <DollarSign className="h-4 w-4 mr-1" />
+                        <CheckCircle className="h-4 w-4 mr-1" />
                         Assign
                       </Button>
                     </td>
@@ -353,6 +357,7 @@ export function EmployeesComponent({
                         variant="outline"
                         size="sm"
                         onClick={() => handleCreateOvertime(employee)}
+                        className="cursor-pointer"
                       >
                         <Clock className="h-4 w-4 mr-1" />
                         Add Overtime
@@ -431,7 +436,7 @@ export function EmployeesComponent({
                     <SelectValue placeholder="Select a salary component" />
                   </SelectTrigger>
                   <SelectContent>
-                    {salaryCpts?.map((component: any) => (
+                    {safeSalaryCpts?.map((component: any) => (
                       <SelectItem key={component.id} value={component.id}>
                         {component.name} ({component.component_type})
                       </SelectItem>
